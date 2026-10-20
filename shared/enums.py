@@ -1,0 +1,110 @@
+"""Victory Crest One - System Enums
+Shared enumeration types for business modules, roles, permissions, statuses, and multi-tenant scoping.
+"""
+
+from enum import Enum
+
+
+class ModuleType(str, Enum):
+    DASHBOARD = "dashboard"
+    SALES = "sales"
+    MARKETING = "marketing"
+    COMMERCE = "commerce"
+    POS = "pos"
+    SERVICE = "service"
+    FINANCE = "finance"
+    ACCOUNTING = "accounting"
+    ERP = "erp"
+    INVENTORY = "inventory"
+    PROCUREMENT = "procurement"
+    MANUFACTURING = "manufacturing"
+    HR = "hr"
+    PAYROLL = "payroll"
+    BI = "bi"
+    PROJECTS = "projects"
+    HOTEL = "hotel"
+    RESTAURANT = "restaurant"
+    DOCUMENTS = "documents"
+    AUTOMATION = "automation"
+    AI_ASSISTANT = "ai_assistant"
+    SETTINGS = "settings"
+
+
+class UserRole(str, Enum):
+    SYSTEM_ADMIN = "System Administrator"
+    ORG_OWNER = "Organisation Owner"
+    GROUP_GM = "Group General Manager"
+    GENERAL_MANAGER = "General Manager"
+    FINANCE_MANAGER = "Finance Manager"
+    ACCOUNTANT = "Accountant"
+    SALES_MANAGER = "Sales Manager"
+    SALES_REP = "Sales Representative"
+    MARKETING_MANAGER = "Marketing Manager"
+    ECOMMERCE_MANAGER = "E-commerce Manager"
+    STORE_MANAGER = "Store Manager"
+    POS_CASHIER = "POS Cashier"
+    SERVICE_MANAGER = "Customer Service Manager"
+    SERVICE_TECH = "Service Technician"
+    ERP_MANAGER = "ERP Manager"
+    PROCUREMENT_MANAGER = "Procurement Manager"
+    INVENTORY_MANAGER = "Inventory Manager"
+    MANUFACTURING_MANAGER = "Manufacturing Manager"
+    HR_MANAGER = "HR Manager"
+    HR_STAFF = "HR Staff"
+    PAYROLL_ADMIN = "Payroll Administrator"
+    BI_ANALYST = "Business Intelligence Analyst"
+    DATA_ANALYST = "Data Analyst"
+    PROJECT_MANAGER = "Project Manager"
+    HOTEL_MANAGER = "Hotel Manager"
+    RECEPTIONIST = "Receptionist"
+    HOUSEKEEPING_MANAGER = "Housekeeping Manager"
+    RESTAURANT_MANAGER = "Restaurant Manager"
+    AUDITOR = "Auditor"
+    READ_ONLY = "Read-Only User"
+
+
+class PermissionAction(str, Enum):
+    VIEW = "view"
+    CREATE = "create"
+    EDIT = "edit"
+    SUBMIT = "submit"
+    APPROVE = "approve"
+    REJECT = "reject"
+    EXPORT = "export"
+    ARCHIVE = "archive"
+    DELETE = "delete"
+    MANAGE_SETTINGS = "manage_settings"
+    MANAGE_USERS = "manage_users"
+    ACCESS_SENSITIVE = "access_sensitive"
+
+
+class PropertyType(str, Enum):
+    HOTEL = "hotel"
+    RESORT = "resort"
+    RESTAURANT = "restaurant"
+    RETAIL_STORE = "retail_store"
+    WAREHOUSE = "warehouse"
+    CORPORATE_OFFICE = "corporate_office"
+    MANUFACTURING_PLANT = "manufacturing_plant"
+
+
+class PropertyStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    MAINTENANCE = "maintenance"
+    SIMULATED = "simulated"
+
+
+class SyncStatus(str, Enum):
+    ONLINE = "online"
+    OFFLINE = "offline"
+    SYNCING = "syncing"
+    ERROR = "error"
+    DEGRADED = "degraded"
+
+
+class DatabaseStatus(str, Enum):
+    CONNECTED = "connected"
+    DISCONNECTED = "disconnected"
+    DEGRADED = "degraded"
+    OFFLINE_LOCAL = "offline_local"

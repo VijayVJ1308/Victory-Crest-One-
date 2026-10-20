@@ -1,0 +1,20 @@
+# Victory Crest One - Core Dependencies
+pyside6>=6.5.0
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+sqlalchemy>=2.0.0
+alembic>=1.11.0
+psycopg2-binary>=2.9.6
+httpx>=0.24.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+reportlab>=4.0.0
+argon2-cffi>=21.3.0
+python-dotenv>=1.0.0
+
+# Development & Testing Dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
