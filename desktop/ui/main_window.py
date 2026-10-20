@@ -20,6 +20,8 @@ from desktop.ui.views.dashboard_view import DashboardView
 from desktop.ui.views.module_catalog_view import ModuleCatalogView
 from desktop.ui.views.planned_module_view import PlannedModuleView
 from desktop.ui.views.diagnostics_view import DiagnosticsView
+from desktop.ui.views.settings_view import SettingsView
+from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
 
@@ -70,11 +72,13 @@ class MainWindow(QMainWindow):
         self.module_catalog_view = ModuleCatalogView(on_select_module=self.navigate_to_module)
         self.planned_module_view = PlannedModuleView(on_back=lambda: self.navigate_to("modules"))
         self.diagnostics_view = DiagnosticsView()
+        self.settings_view = SettingsView(on_change_user=self.open_login_dialog)
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
         self.view_stack.addWidget(self.planned_module_view)      # index 2: planned
         self.view_stack.addWidget(self.diagnostics_view)        # index 3: diagnostics
+        self.view_stack.addWidget(self.settings_view)           # index 4: settings
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -144,7 +148,7 @@ class MainWindow(QMainWindow):
                 ("hr", "👥  Human Resources", "planned"),
                 ("documents", "📁  Documents Vault", "planned"),
                 ("diagnostics", "⚙️  System Diagnostics", "active"),
-                ("settings", "🔒  Administration & Security", "planned"),
+                ("settings", "🔒  Administration & Security", "active"),
             ]),
         ]
 
@@ -207,10 +211,12 @@ class MainWindow(QMainWindow):
         self.conn_status_badge = StatusBadge("OFFLINE", "offline")
         layout.addWidget(self.conn_status_badge)
 
-        # User Profile Avatar / Tag
-        user_btn = QPushButton("👤 Administrator")
-        user_btn.setProperty("class", "btn_secondary")
-        layout.addWidget(user_btn)
+        # User Profile Button (Clickable to switch accounts)
+        user_info = session_manager.current_user.get("full_name", "Administrator")
+        self.user_btn = QPushButton(f"👤 {user_info}")
+        self.user_btn.setProperty("class", "btn_secondary")
+        self.user_btn.clicked.connect(self.open_login_dialog)
+        layout.addWidget(self.user_btn)
 
         return toolbar
 
@@ -272,6 +278,21 @@ class MainWindow(QMainWindow):
         else:
             self.conn_status_badge.set_status("DEV OFFLINE", "offline")
 
+    def open_login_dialog(self):
+        """Open the authentication and account switching dialog."""
+        dialog = LoginDialog(on_success=self.on_user_authenticated, parent=self)
+        dialog.exec()
+
+    def on_user_authenticated(self):
+        """Handle successful authentication."""
+        user = session_manager.current_user
+        name = user.get("full_name") or user.get("username", "User")
+        role = user.get("role", "Staff")
+        self.user_btn.setText(f"👤 {name} ({role})")
+        self.refresh_active_views()
+        if hasattr(self, "settings_view"):
+            self.settings_view.refresh_data()
+
     def navigate_to(self, key: str):
         """Route central stack widget based on navigation key."""
         self.current_nav_key = key
@@ -283,10 +304,14 @@ class MainWindow(QMainWindow):
             self.dashboard_view.refresh_data()
             self.view_stack.setCurrentIndex(0)
         elif key == "modules":
+            self.module_catalog_view.filter_modules("")
             self.view_stack.setCurrentIndex(1)
         elif key == "diagnostics":
             self.diagnostics_view.run_diagnostics()
             self.view_stack.setCurrentIndex(3)
+        elif key == "settings":
+            self.settings_view.refresh_data()
+            self.view_stack.setCurrentIndex(4)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)
