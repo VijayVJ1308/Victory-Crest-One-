@@ -21,6 +21,7 @@ from desktop.ui.views.module_catalog_view import ModuleCatalogView
 from desktop.ui.views.planned_module_view import PlannedModuleView
 from desktop.ui.views.diagnostics_view import DiagnosticsView
 from desktop.ui.views.settings_view import SettingsView
+from desktop.ui.views.documents_view import DocumentsView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -73,12 +74,14 @@ class MainWindow(QMainWindow):
         self.planned_module_view = PlannedModuleView(on_back=lambda: self.navigate_to("modules"))
         self.diagnostics_view = DiagnosticsView()
         self.settings_view = SettingsView(on_change_user=self.open_login_dialog)
+        self.documents_view = DocumentsView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
         self.view_stack.addWidget(self.planned_module_view)      # index 2: planned
         self.view_stack.addWidget(self.diagnostics_view)        # index 3: diagnostics
         self.view_stack.addWidget(self.settings_view)           # index 4: settings
+        self.view_stack.addWidget(self.documents_view)          # index 5: documents
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -146,7 +149,7 @@ class MainWindow(QMainWindow):
             ]),
             ("PEOPLE & ADMINISTRATION", [
                 ("hr", "👥  Human Resources", "planned"),
-                ("documents", "📁  Documents Vault", "planned"),
+                ("documents", "📁  Documents Vault", "active"),
                 ("diagnostics", "⚙️  System Diagnostics", "active"),
                 ("settings", "🔒  Administration & Security", "active"),
             ]),
@@ -210,6 +213,13 @@ class MainWindow(QMainWindow):
         # Connection Status Capsule
         self.conn_status_badge = StatusBadge("OFFLINE", "offline")
         layout.addWidget(self.conn_status_badge)
+
+        # Notification Bell Button
+        unread = api_client.get_unread_notification_count()
+        self.notif_btn = QPushButton(f"🔔 {unread}")
+        self.notif_btn.setProperty("class", "btn_secondary")
+        self.notif_btn.clicked.connect(self.open_notifications_dialog)
+        layout.addWidget(self.notif_btn)
 
         # User Profile Button (Clickable to switch accounts)
         user_info = session_manager.current_user.get("full_name", "Administrator")
@@ -293,6 +303,55 @@ class MainWindow(QMainWindow):
         if hasattr(self, "settings_view"):
             self.settings_view.refresh_data()
 
+    def open_notifications_dialog(self):
+        """Open notification center dialog."""
+        from PySide6.QtWidgets import QDialog, QVBoxLayout, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Notifications & Alerts — Victory Crest ONE")
+        dialog.resize(460, 360)
+        dialog.setStyleSheet(ENTERPRISE_STYLE_SHEET)
+
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
+
+        header = QLabel("Notifications & System Alerts")
+        header.setStyleSheet("font-size: 15px; font-weight: 700;")
+        layout.addWidget(header)
+
+        list_widget = QListWidget()
+        list_widget.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {ThemeColors.BG_SURFACE};
+                border: 1px solid {ThemeColors.BORDER_LIGHT};
+                border-radius: 6px;
+                padding: 6px;
+                color: {ThemeColors.TEXT_MAIN};
+            }}
+        """)
+
+        notifs = api_client.get_notifications()
+        for n in notifs:
+            icon = "ℹ️" if n.get("notification_type") == "INFO" else "⚡"
+            status_tag = "" if n.get("is_read") else " [NEW]"
+            item = QListWidgetItem(f"{icon} {n.get('title')}{status_tag}\n   {n.get('message')}")
+            list_widget.addItem(item)
+            if not n.get("is_read"):
+                api_client.mark_notification_read(n.get("id"))
+
+        layout.addWidget(list_widget)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        close_btn = QPushButton("Close")
+        close_btn.setProperty("class", "btn_secondary")
+        close_btn.clicked.connect(dialog.accept)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
+
+        dialog.exec()
+        self.notif_btn.setText(f"🔔 {api_client.get_unread_notification_count()}")
+
     def navigate_to(self, key: str):
         """Route central stack widget based on navigation key."""
         self.current_nav_key = key
@@ -312,6 +371,9 @@ class MainWindow(QMainWindow):
         elif key == "settings":
             self.settings_view.refresh_data()
             self.view_stack.setCurrentIndex(4)
+        elif key == "documents":
+            self.documents_view.refresh_data()
+            self.view_stack.setCurrentIndex(5)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)
