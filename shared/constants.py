@@ -69,7 +69,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "💰",
         "description": "Receivables, payables, expenses, bank reconciliations, cash-flow, and budgets.",
         "phase": 4,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "accounting",
@@ -78,7 +78,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📑",
         "description": "Double-entry general ledger, chart of accounts, journal entries, and trial balance.",
         "phase": 4,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "erp",

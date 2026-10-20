@@ -22,6 +22,7 @@ from desktop.ui.views.planned_module_view import PlannedModuleView
 from desktop.ui.views.diagnostics_view import DiagnosticsView
 from desktop.ui.views.settings_view import SettingsView
 from desktop.ui.views.documents_view import DocumentsView
+from desktop.ui.views.finance_view import FinanceView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         self.diagnostics_view = DiagnosticsView()
         self.settings_view = SettingsView(on_change_user=self.open_login_dialog)
         self.documents_view = DocumentsView()
+        self.finance_view = FinanceView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -82,6 +84,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.diagnostics_view)        # index 3: diagnostics
         self.view_stack.addWidget(self.settings_view)           # index 4: settings
         self.view_stack.addWidget(self.documents_view)          # index 5: documents
+        self.view_stack.addWidget(self.finance_view)            # index 6: finance & accounting
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -136,8 +139,8 @@ class MainWindow(QMainWindow):
                 ("pos", "💳  Point of Sale", "planned"),
             ]),
             ("OPERATIONS & ERP", [
-                ("finance", "💰  Finance & Banking", "planned"),
-                ("accounting", "📑  General Accounting", "planned"),
+                ("finance", "💰  Finance & Banking", "active"),
+                ("accounting", "📑  General Accounting", "active"),
                 ("erp", "📦  Supply Chain & ERP", "planned"),
                 ("inventory", "🏭  Inventory & Warehouse", "planned"),
                 ("service", "🛠️  Customer & Field Service", "planned"),
@@ -275,6 +278,8 @@ class MainWindow(QMainWindow):
     def refresh_active_views(self):
         self.status_left.setText(f"Active Scope: {session_manager.get_context_title()}")
         self.dashboard_view.refresh_data()
+        if hasattr(self, "finance_view"):
+            self.finance_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -374,6 +379,14 @@ class MainWindow(QMainWindow):
         elif key == "documents":
             self.documents_view.refresh_data()
             self.view_stack.setCurrentIndex(5)
+        elif key == "finance":
+            self.finance_view.refresh_data()
+            self.finance_view.tabs.setCurrentIndex(2)  # AR / Invoices
+            self.view_stack.setCurrentIndex(6)
+        elif key == "accounting":
+            self.finance_view.refresh_data()
+            self.finance_view.tabs.setCurrentIndex(0)  # Journals / GL
+            self.view_stack.setCurrentIndex(6)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

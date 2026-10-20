@@ -102,3 +102,82 @@ def calculate_lead_conversion_rate(
     converted = to_decimal(converted_leads)
     rate = (converted / eligible) * Decimal("100")
     return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def validate_journal_balance(lines: list) -> tuple[bool, Decimal, Decimal, Decimal]:
+    """
+    Validate that total debits strictly equal total credits for a set of journal lines.
+    Returns: (is_balanced, total_debits, total_credits, difference)
+    """
+    total_debits = Decimal("0.00")
+    total_credits = Decimal("0.00")
+
+    for line in lines:
+        if isinstance(line, dict):
+            deb = to_decimal(line.get("debit", 0))
+            crd = to_decimal(line.get("credit", 0))
+        else:
+            deb = to_decimal(getattr(line, "debit", 0))
+            crd = to_decimal(getattr(line, "credit", 0))
+        total_debits += deb
+        total_credits += crd
+
+    diff = (total_debits - total_credits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    is_balanced = (diff == Decimal("0.00"))
+    return (
+        is_balanced,
+        total_debits.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        total_credits.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        diff
+    )
+
+
+def calculate_invoice_totals(lines: list, tax_rate_percent: Number = Decimal("0.00")) -> dict:
+    """
+    Calculate subtotal, tax amount, and total amount for invoice or bill lines.
+    """
+    subtotal = Decimal("0.00")
+    for line in lines:
+        if isinstance(line, dict):
+            qty = to_decimal(line.get("quantity", 1))
+            price = to_decimal(line.get("unit_price", 0))
+            raw_amt = line.get("amount")
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * price)
+        else:
+            qty = to_decimal(getattr(line, "quantity", 1))
+            price = to_decimal(getattr(line, "unit_price", 0))
+            raw_amt = getattr(line, "amount", None)
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * price)
+        subtotal += line_amt
+
+    subtotal = subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    tax_rate = to_decimal(tax_rate_percent)
+    tax_amount = (subtotal * (tax_rate / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_amount = subtotal + tax_amount
+
+    return {
+        "subtotal": subtotal,
+        "tax_amount": tax_amount,
+        "total_amount": total_amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+def calculate_account_net_balance(
+    account_type: str,
+    total_debits: Number,
+    total_credits: Number
+) -> Decimal:
+    """
+    Calculate net balance for an account based on standard normal balance rules:
+    - ASSET, COGS, EXPENSE: Normal balance is DEBIT (Debits - Credits)
+    - LIABILITY, EQUITY, REVENUE: Normal balance is CREDIT (Credits - Debits)
+    """
+    debits = to_decimal(total_debits)
+    credits = to_decimal(total_credits)
+    acc_type = account_type.lower()
+
+    if acc_type in ("asset", "cogs", "expense"):
+        return (debits - credits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        return (credits - debits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+

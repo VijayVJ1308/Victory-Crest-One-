@@ -3,6 +3,13 @@
 
 from backend.app.schemas.health import SystemHealthSchema, DatabaseHealthSchema
 from backend.app.schemas.organization import OrganizationBase, OrganizationOut, PropertyBase, PropertyOut
+from backend.app.schemas.finance import (
+    AccountCreate, AccountOut,
+    JournalEntryCreate, JournalEntryOut,
+    CustomerInvoiceCreate, CustomerInvoiceOut, CustomerPaymentCreate, CustomerPaymentOut,
+    SupplierBillCreate, SupplierBillOut, BillPaymentCreate, BillPaymentOut,
+    TrialBalanceResponse, ProfitAndLossResponse, BalanceSheetResponse
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -10,5 +17,21 @@ __all__ = [
     "OrganizationBase",
     "OrganizationOut",
     "PropertyBase",
-    "PropertyOut"
+    "PropertyOut",
+    "AccountCreate",
+    "AccountOut",
+    "JournalEntryCreate",
+    "JournalEntryOut",
+    "CustomerInvoiceCreate",
+    "CustomerInvoiceOut",
+    "CustomerPaymentCreate",
+    "CustomerPaymentOut",
+    "SupplierBillCreate",
+    "SupplierBillOut",
+    "BillPaymentCreate",
+    "BillPaymentOut",
+    "TrialBalanceResponse",
+    "ProfitAndLossResponse",
+    "BalanceSheetResponse"
 ]
+

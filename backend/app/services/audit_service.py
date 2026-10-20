@@ -43,6 +43,31 @@ class AuditService:
         logger.info(f"AUDIT: [{log_entry['action']}] {entity_type} {entity_id or ''} by {user_email}")
         return log_entry
 
+    @classmethod
+    def log_event(
+        cls,
+        action: str,
+        resource_type: Optional[str] = None,
+        resource_id: Optional[str] = None,
+        user_id: Optional[str] = "system",
+        username: Optional[str] = "System",
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None,
+        details: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Convenience adapter for logging events."""
+        detail_str = str(details) if details else None
+        return cls.record_event(
+            action=action,
+            entity_type=resource_type or "resource",
+            entity_id=resource_id,
+            user_email=username or user_id or "system",
+            organization_id=organization_id,
+            property_id=property_id,
+            details=detail_str
+        )
+
     @staticmethod
     def get_logs(
         organization_id: Optional[str] = None,

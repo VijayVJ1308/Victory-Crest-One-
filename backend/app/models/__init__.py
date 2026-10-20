@@ -12,6 +12,17 @@ from backend.app.models.master_data import (
     DocumentMetadata,
     Notification
 )
+from backend.app.models.finance import (
+    Account,
+    JournalEntry,
+    JournalLine,
+    CustomerInvoice,
+    CustomerInvoiceLine,
+    CustomerPayment,
+    SupplierBill,
+    SupplierBillLine,
+    BillPayment
+)
 
 __all__ = [
     "Base",
@@ -26,5 +37,15 @@ __all__ = [
     "Supplier",
     "ProductMaster",
     "DocumentMetadata",
-    "Notification"
+    "Notification",
+    "Account",
+    "JournalEntry",
+    "JournalLine",
+    "CustomerInvoice",
+    "CustomerInvoiceLine",
+    "CustomerPayment",
+    "SupplierBill",
+    "SupplierBillLine",
+    "BillPayment"
 ]
+

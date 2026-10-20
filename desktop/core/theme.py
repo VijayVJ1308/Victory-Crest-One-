@@ -6,6 +6,7 @@ Cohesive dark theme palette, typography rules, component styling, and Qt Style S
 class ThemeColors:
     BG_BASE = "#090D16"
     BG_SURFACE = "#111827"
+    BG_SECONDARY = "#161F30"
     BG_CARD = "#161F30"
     BG_CARD_HOVER = "#1D283D"
     BG_INPUT = "#0F172A"
@@ -17,16 +18,20 @@ class ThemeColors:
     PRIMARY = "#2563EB"
     PRIMARY_HOVER = "#1D4ED8"
     PRIMARY_LIGHT = "#3B82F6"
+    ACCENT_PRIMARY = "#3B82F6"
     
     TEXT_MAIN = "#F8FAFC"
     TEXT_MUTED = "#94A3B8"
     TEXT_DIM = "#64748B"
     
     STATUS_ACTIVE = "#10B981"
+    STATUS_SUCCESS = "#10B981"
+    STATUS_INFO = "#3B82F6"
     STATUS_PLANNED = "#8B5CF6"
     STATUS_WARNING = "#F59E0B"
     STATUS_ERROR = "#EF4444"
     STATUS_OFFLINE = "#6B7280"
+
 
 
 ENTERPRISE_STYLE_SHEET = f"""

@@ -108,3 +108,59 @@ class DatabaseStatus(str, Enum):
     DISCONNECTED = "disconnected"
     DEGRADED = "degraded"
     OFFLINE_LOCAL = "offline_local"
+
+
+class AccountType(str, Enum):
+    ASSET = "asset"
+    LIABILITY = "liability"
+    EQUITY = "equity"
+    REVENUE = "revenue"
+    COGS = "cogs"
+    EXPENSE = "expense"
+
+
+class NormalBalance(str, Enum):
+    DEBIT = "debit"
+    CREDIT = "credit"
+
+
+class JournalEntryType(str, Enum):
+    GENERAL = "general"
+    INVOICE = "invoice"
+    BILL = "bill"
+    PAYMENT = "payment"
+    PAYROLL = "payroll"
+    REVERSAL = "reversal"
+    ADJUSTING = "adjusting"
+    CLOSING = "closing"
+
+
+class JournalStatus(str, Enum):
+    DRAFT = "draft"
+    POSTED = "posted"
+    REVERSED = "reversed"
+
+
+class InvoiceStatus(str, Enum):
+    DRAFT = "draft"
+    ISSUED = "issued"
+    PARTIALLY_PAID = "partially_paid"
+    PAID = "paid"
+    VOID = "void"
+
+
+class BillStatus(str, Enum):
+    DRAFT = "draft"
+    RECEIVED = "received"
+    PARTIALLY_PAID = "partially_paid"
+    PAID = "paid"
+    VOID = "void"
+
+
+class PaymentMethod(str, Enum):
+    BANK_TRANSFER = "bank_transfer"
+    CREDIT_CARD = "credit_card"
+    CASH = "cash"
+    CHECK = "check"
+    ELECTRONIC = "electronic"
+

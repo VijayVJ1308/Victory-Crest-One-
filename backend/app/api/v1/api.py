@@ -14,7 +14,8 @@ from backend.app.api.v1.endpoints import (
     suppliers,
     products,
     documents,
-    notifications
+    notifications,
+    finance
 )
 
 api_router = APIRouter()
@@ -30,3 +31,5 @@ api_router.include_router(suppliers.router, tags=["Supplier Master"])
 api_router.include_router(products.router, tags=["Product Master"])
 api_router.include_router(documents.router, tags=["Document Vault"])
 api_router.include_router(notifications.router, tags=["In-App Notifications"])
+api_router.include_router(finance.router, tags=["Finance & General Accounting"])
+
