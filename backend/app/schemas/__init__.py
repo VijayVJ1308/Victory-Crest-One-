@@ -10,6 +10,13 @@ from backend.app.schemas.finance import (
     SupplierBillCreate, SupplierBillOut, BillPaymentCreate, BillPaymentOut,
     TrialBalanceResponse, ProfitAndLossResponse, BalanceSheetResponse
 )
+from backend.app.schemas.crm import (
+    LeadCreate, LeadUpdate, LeadOut, LeadConvertRequest, LeadConvertResponse,
+    DealCreate, DealUpdate, DealOut, DealStageUpdateRequest,
+    QuoteCreate, QuoteOut, QuoteConvertInvoiceResponse,
+    SalesActivityCreate, SalesActivityOut,
+    SalesPipelineMetricsResponse
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -32,6 +39,22 @@ __all__ = [
     "BillPaymentOut",
     "TrialBalanceResponse",
     "ProfitAndLossResponse",
-    "BalanceSheetResponse"
+    "BalanceSheetResponse",
+    "LeadCreate",
+    "LeadUpdate",
+    "LeadOut",
+    "LeadConvertRequest",
+    "LeadConvertResponse",
+    "DealCreate",
+    "DealUpdate",
+    "DealOut",
+    "DealStageUpdateRequest",
+    "QuoteCreate",
+    "QuoteOut",
+    "QuoteConvertInvoiceResponse",
+    "SalesActivityCreate",
+    "SalesActivityOut",
+    "SalesPipelineMetricsResponse"
 ]
+
 

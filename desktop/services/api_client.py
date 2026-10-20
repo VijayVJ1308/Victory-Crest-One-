@@ -450,6 +450,166 @@ class ApiClient:
         bs = finance_service.get_balance_sheet(organization_id)
         return bs.model_dump()
 
+    # --- Sales CRM API Client Methods ---
+    def get_leads(self, organization_id: Optional[str] = None, status_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/leads"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if status_filter:
+            params["status_filter"] = status_filter
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        return crm_service.get_leads(organization_id=organization_id, status_filter=status_filter)
+
+    def create_lead(self, lead_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/leads"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=lead_data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        from backend.app.schemas.crm import LeadCreate
+        return crm_service.create_lead(LeadCreate(**lead_data))
+
+    def convert_lead(self, lead_id: str, convert_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/leads/{lead_id}/convert"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=convert_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        from backend.app.schemas.crm import LeadConvertRequest
+        conv = crm_service.convert_lead(lead_id, LeadConvertRequest(**convert_data))
+        return conv.model_dump()
+
+    def get_deals(self, organization_id: Optional[str] = None, stage: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/deals"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if stage:
+            params["stage"] = stage
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        return crm_service.get_deals(organization_id=organization_id, stage_filter=stage)
+
+    def create_deal(self, deal_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/deals"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=deal_data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        from backend.app.schemas.crm import DealCreate
+        return crm_service.create_deal(DealCreate(**deal_data))
+
+    def update_deal_stage(self, deal_id: str, stage: str, notes: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/deals/{deal_id}/stage"
+        payload = {"stage": stage, "notes": notes}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.patch(url, json=payload)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        from backend.app.schemas.crm import DealStageUpdateRequest
+        return crm_service.update_deal_stage(deal_id, DealStageUpdateRequest(**payload))
+
+    def get_quotes(self, organization_id: Optional[str] = None, status_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/quotes"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if status_filter:
+            params["status_filter"] = status_filter
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        return crm_service.get_quotes(organization_id=organization_id, status_filter=status_filter)
+
+    def create_quote(self, quote_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/quotes"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=quote_data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        from backend.app.schemas.crm import QuoteCreate
+        return crm_service.create_quote(QuoteCreate(**quote_data))
+
+    def convert_quote_to_invoice(self, quote_id: str) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/quotes/{quote_id}/convert-invoice"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        conv = crm_service.convert_quote_to_invoice(quote_id)
+        return conv.model_dump()
+
+    def get_pipeline_metrics(self, organization_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/metrics"
+        params = {"organization_id": organization_id} if organization_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        metrics = crm_service.get_pipeline_metrics(organization_id)
+        return metrics.model_dump()
+
+    def get_activities(self, organization_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/crm/activities"
+        params = {"organization_id": organization_id} if organization_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.crm_service import crm_service
+        return crm_service.get_activities(organization_id)
+
 
 api_client = ApiClient()
+
 

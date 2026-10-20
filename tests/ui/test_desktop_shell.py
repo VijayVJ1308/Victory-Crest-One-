@@ -49,10 +49,10 @@ def test_main_window_shell_initialization(qapp):
     window.navigate_to("diagnostics")
     assert window.view_stack.currentIndex() == 3
     
-    # Test navigation to a planned module (sales)
-    window.navigate_to("sales")
+    # Test navigation to a planned module (hotel)
+    window.navigate_to("hotel")
     assert window.view_stack.currentIndex() == 2
-    assert window.planned_module_view.current_module_id == "sales"
+    assert window.planned_module_view.current_module_id == "hotel"
     
     # Return to dashboard
     window.navigate_to("dashboard")

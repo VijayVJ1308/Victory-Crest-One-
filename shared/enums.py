@@ -164,3 +164,47 @@ class PaymentMethod(str, Enum):
     CHECK = "check"
     ELECTRONIC = "electronic"
 
+
+class LeadStatus(str, Enum):
+    NEW = "new"
+    CONTACTED = "contacted"
+    QUALIFIED = "qualified"
+    UNQUALIFIED = "unqualified"
+    CONVERTED = "converted"
+
+
+class LeadSource(str, Enum):
+    WEBSITE = "website"
+    REFERRAL = "referral"
+    COLD_OUTREACH = "cold_outreach"
+    TRADE_SHOW = "trade_show"
+    PARTNER = "partner"
+    SOCIAL_MEDIA = "social_media"
+    DIRECT = "direct"
+
+
+class DealStage(str, Enum):
+    QUALIFICATION = "qualification"
+    NEEDS_ANALYSIS = "needs_analysis"
+    PROPOSAL = "proposal"
+    NEGOTIATION = "negotiation"
+    CLOSED_WON = "closed_won"
+    CLOSED_LOST = "closed_lost"
+
+
+class QuoteStatus(str, Enum):
+    DRAFT = "draft"
+    SENT = "sent"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class ActivityType(str, Enum):
+    CALL = "call"
+    MEETING = "meeting"
+    EMAIL = "email"
+    NOTE = "note"
+    TASK = "task"
+
+

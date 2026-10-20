@@ -23,6 +23,13 @@ from backend.app.models.finance import (
     SupplierBillLine,
     BillPayment
 )
+from backend.app.models.crm import (
+    Lead,
+    Deal,
+    Quote,
+    QuoteLine,
+    SalesActivity
+)
 
 __all__ = [
     "Base",
@@ -46,6 +53,12 @@ __all__ = [
     "CustomerPayment",
     "SupplierBill",
     "SupplierBillLine",
-    "BillPayment"
+    "BillPayment",
+    "Lead",
+    "Deal",
+    "Quote",
+    "QuoteLine",
+    "SalesActivity"
 ]
+
 

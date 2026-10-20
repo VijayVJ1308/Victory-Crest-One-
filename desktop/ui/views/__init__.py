@@ -8,6 +8,7 @@ from desktop.ui.views.diagnostics_view import DiagnosticsView
 from desktop.ui.views.settings_view import SettingsView
 from desktop.ui.views.documents_view import DocumentsView
 from desktop.ui.views.finance_view import FinanceView
+from desktop.ui.views.crm_view import SalesCrmView
 
 __all__ = [
     "DashboardView",
@@ -16,5 +17,7 @@ __all__ = [
     "DiagnosticsView",
     "SettingsView",
     "DocumentsView",
-    "FinanceView"
+    "FinanceView",
+    "SalesCrmView"
 ]
+

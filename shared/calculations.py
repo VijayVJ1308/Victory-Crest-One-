@@ -181,3 +181,61 @@ def calculate_account_net_balance(
     else:
         return (credits - debits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
+
+def get_default_stage_probability(stage: str) -> int:
+    """Return standard sales pipeline probability percentage by stage."""
+    probabilities = {
+        "qualification": 10,
+        "needs_analysis": 30,
+        "proposal": 60,
+        "negotiation": 80,
+        "closed_won": 100,
+        "closed_lost": 0,
+    }
+    return probabilities.get(stage.lower(), 10)
+
+
+def calculate_weighted_pipeline(deals: list) -> tuple[Decimal, Decimal]:
+    """
+    Calculate Total Pipeline Value and Expected Weighted Revenue:
+    Weighted Value = Sum(Amount * Probability / 100)
+    Excludes CLOSED_LOST from active forecast.
+    Returns: (total_active_pipeline, weighted_forecast_value)
+    """
+    total_val = Decimal("0.00")
+    weighted_val = Decimal("0.00")
+
+    for d in deals:
+        if isinstance(d, dict):
+            st = str(d.get("stage", "")).lower()
+            amt = to_decimal(d.get("amount", 0))
+            prob = int(d.get("probability_percent", get_default_stage_probability(st)))
+        else:
+            st = str(getattr(d, "stage", "")).lower()
+            amt = to_decimal(getattr(d, "amount", 0))
+            prob = int(getattr(d, "probability_percent", get_default_stage_probability(st)))
+
+        if st == "closed_lost":
+            continue
+
+        total_val += amt
+        weighted_val += (amt * Decimal(prob) / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return (
+        total_val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        weighted_val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
+
+
+def calculate_win_rate(won_count: int, lost_count: int) -> Decimal:
+    """
+    Win Rate = (Closed Won / (Closed Won + Closed Lost)) * 100.
+    Handles zero denominator gracefully.
+    """
+    total_closed = won_count + lost_count
+    if total_closed <= 0:
+        return Decimal("0.00")
+    rate = (Decimal(won_count) / Decimal(total_closed)) * Decimal("100")
+    return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+

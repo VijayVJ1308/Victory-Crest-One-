@@ -33,7 +33,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "💼",
         "description": "Leads, deals, pipelines, quotes, customer accounts, and sales team quotas.",
         "phase": 5,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "marketing",
