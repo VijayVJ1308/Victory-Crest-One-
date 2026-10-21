@@ -43,6 +43,13 @@ from backend.app.schemas.inventory import (
     CycleCountCreate, CycleCountItemVariance, CycleCountReconcileRequest, CycleCountOut,
     InventoryMetricsOut
 )
+from backend.app.schemas.hr import (
+    EmployeeBase, EmployeeCreate, EmployeeUpdate, EmployeeOut,
+    AttendanceClockInRequest, AttendanceClockOutRequest, AttendanceRecordCreate, AttendanceRecordOut,
+    LeaveRequestCreate, LeaveReviewRequest, LeaveRequestOut,
+    SalaryBreakdownOut, PayslipOut, PayrollRunCreate, PayrollRunOut,
+    HrMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -129,7 +136,23 @@ __all__ = [
     "CycleCountItemVariance",
     "CycleCountReconcileRequest",
     "CycleCountOut",
-    "InventoryMetricsOut"
+    "InventoryMetricsOut",
+    "EmployeeBase",
+    "EmployeeCreate",
+    "EmployeeUpdate",
+    "EmployeeOut",
+    "AttendanceClockInRequest",
+    "AttendanceClockOutRequest",
+    "AttendanceRecordCreate",
+    "AttendanceRecordOut",
+    "LeaveRequestCreate",
+    "LeaveReviewRequest",
+    "LeaveRequestOut",
+    "SalaryBreakdownOut",
+    "PayslipOut",
+    "PayrollRunCreate",
+    "PayrollRunOut",
+    "HrMetricsOut"
 ]
 
 

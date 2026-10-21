@@ -143,7 +143,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "👥",
         "description": "Employee directory, recruitment pipeline, shift attendance, and leave management.",
         "phase": 9,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "payroll",
@@ -152,7 +152,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "💵",
         "description": "Salary structures, statutory earnings, deductions, payslip generation, and disbursements.",
         "phase": 9,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "projects",

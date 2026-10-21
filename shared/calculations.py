@@ -545,6 +545,160 @@ def calculate_po_totals(lines: list, tax_rate_percent: Number = Decimal("0.00"))
     }
 
 
+def calculate_salary_breakdown(
+    monthly_gross: Number,
+    basic_ratio: Number = Decimal("0.50"),
+    hra_ratio: Number = Decimal("0.20"),
+    pf_rate: Number = Decimal("0.12"),
+    tds_rate: Number = Decimal("0.05")
+) -> dict:
+    """
+    Calculate statutory salary structure breakdown:
+    Earnings: Basic, HRA, Special Allowance
+    Deductions: Provident Fund (12% of basic), Professional Tax, TDS
+    """
+    gross = to_decimal(monthly_gross)
+    b_ratio = to_decimal(basic_ratio)
+    h_ratio = to_decimal(hra_ratio)
+    pf_pct = to_decimal(pf_rate)
+    tds_pct = to_decimal(tds_rate)
+
+    basic = (gross * b_ratio).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    hra = (gross * h_ratio).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    conveyance = Decimal("1600.00") if gross >= Decimal("20000.00") else Decimal("800.00")
+    special_allowance = gross - (basic + hra + conveyance)
+    if special_allowance < Decimal("0.00"):
+        special_allowance = Decimal("0.00")
+
+    # Deductions
+    pf_deduction = (basic * pf_pct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    pt_deduction = Decimal("200.00") if gross >= Decimal("15000.00") else Decimal("0.00")
+    tds_deduction = (gross * tds_pct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_deductions = pf_deduction + pt_deduction + tds_deduction
+    net_salary = gross - total_deductions
+
+    return {
+        "gross_salary": gross,
+        "basic": basic,
+        "hra": hra,
+        "conveyance": conveyance,
+        "special_allowance": special_allowance.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "pf_deduction": pf_deduction,
+        "professional_tax": pt_deduction,
+        "tds_deduction": tds_deduction,
+        "total_deductions": total_deductions.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "net_salary": net_salary.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+def calculate_leave_deduction(
+    monthly_gross: Number,
+    working_days: int = 30,
+    unpaid_leave_days: Number = 0
+) -> dict:
+    """
+    Calculate salary deduction for unpaid leaves (LWP - Leave Without Pay).
+    """
+    gross = to_decimal(monthly_gross)
+    unpaid = to_decimal(unpaid_leave_days)
+    if working_days <= 0 or unpaid <= Decimal("0.00"):
+        return {
+            "daily_rate": Decimal("0.00"),
+            "unpaid_days": Decimal("0.00"),
+            "deduction_amount": Decimal("0.00"),
+            "adjusted_gross": gross
+        }
+
+    daily_rate = (gross / Decimal(str(working_days))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    deduction = (daily_rate * unpaid).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    adj_gross = (gross - deduction).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    if adj_gross < Decimal("0.00"):
+        adj_gross = Decimal("0.00")
+
+    return {
+        "daily_rate": daily_rate,
+        "unpaid_days": unpaid,
+        "deduction_amount": deduction,
+        "adjusted_gross": adj_gross
+    }
+
+
+def calculate_overtime_pay(
+    monthly_gross: Number,
+    standard_monthly_hours: int = 240,
+    overtime_hours: Number = 0,
+    ot_multiplier: Number = Decimal("1.50")
+) -> Decimal:
+    """
+    Calculate overtime compensation based on hourly wage and multiplier.
+    """
+    gross = to_decimal(monthly_gross)
+    ot_hrs = to_decimal(overtime_hours)
+    mult = to_decimal(ot_multiplier)
+
+    if standard_monthly_hours <= 0 or ot_hrs <= Decimal("0.00"):
+        return Decimal("0.00")
+
+    hourly_rate = gross / Decimal(str(standard_monthly_hours))
+    ot_pay = hourly_rate * ot_hrs * mult
+    return ot_pay.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_payroll_run_totals(payslips: list) -> dict:
+    """
+    Aggregate total gross earnings, statutory liabilities, and net pay for a monthly payroll batch.
+    """
+    tot_gross = Decimal("0.00")
+    tot_pf = Decimal("0.00")
+    tot_tds = Decimal("0.00")
+    tot_pt = Decimal("0.00")
+    tot_deductions = Decimal("0.00")
+    tot_net = Decimal("0.00")
+
+    for p in payslips:
+        if isinstance(p, dict):
+            gross = to_decimal(p.get("gross_earnings", p.get("gross_salary", 0)))
+            pf = to_decimal(p.get("pf_deduction", 0))
+            tds = to_decimal(p.get("tds_deduction", 0))
+            pt = to_decimal(p.get("professional_tax", 0))
+            ded = to_decimal(p.get("total_deductions", pf + tds + pt))
+            net = to_decimal(p.get("net_pay", p.get("net_salary", gross - ded)))
+        else:
+            gross = to_decimal(getattr(p, "gross_earnings", getattr(p, "gross_salary", 0)))
+            pf = to_decimal(getattr(p, "pf_deduction", 0))
+            tds = to_decimal(getattr(p, "tds_deduction", 0))
+            pt = to_decimal(getattr(p, "professional_tax", 0))
+            ded = to_decimal(getattr(p, "total_deductions", pf + tds + pt))
+            net = to_decimal(getattr(p, "net_pay", getattr(p, "net_salary", gross - ded)))
+
+        tot_gross += gross
+        tot_pf += pf
+        tot_tds += tds
+        tot_pt += pt
+        tot_deductions += ded
+        tot_net += net
+
+    return {
+        "total_employees": len(payslips),
+        "total_gross_earnings": tot_gross.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_pf_liability": tot_pf.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_tds_liability": tot_tds.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_pt_liability": tot_pt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_statutory_deductions": tot_deductions.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_net_disbursement": tot_net.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+def calculate_attendance_rate(total_rostered_shifts: int, present_shifts: int) -> Decimal:
+    """
+    Calculate attendance percentage: (Present / Rostered) * 100
+    """
+    if total_rostered_shifts <= 0:
+        return Decimal("100.00")
+    rate = (Decimal(str(present_shifts)) / Decimal(str(total_rostered_shifts))) * Decimal("100.00")
+    return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
 
 
 

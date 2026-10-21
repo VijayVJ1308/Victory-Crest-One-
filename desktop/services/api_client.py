@@ -1148,6 +1148,240 @@ class ApiClient:
         from backend.app.services.inventory_service import inventory_service
         return inventory_service.get_inventory_metrics().model_dump()
 
+    # ---------------------------------------------------------
+    # Human Resources & Payroll Client Methods
+    # ---------------------------------------------------------
+    def get_employees(
+        self,
+        property_id: Optional[str] = None,
+        department_id: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/employees"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if department_id:
+            params["department_id"] = department_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return [e.model_dump() for e in hr_service.list_employees(property_id=property_id, department_id=department_id, status=status)]
+
+    def get_employee(self, employee_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/employees/{employee_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return hr_service.get_employee(employee_id).model_dump()
+
+    def create_employee(self, emp_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/employees"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=emp_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import EmployeeCreate
+        return hr_service.create_employee(EmployeeCreate(**emp_data)).model_dump()
+
+    def update_employee(self, employee_id: str, emp_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/employees/{employee_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json=emp_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import EmployeeUpdate
+        return hr_service.update_employee(employee_id, EmployeeUpdate(**emp_data)).model_dump()
+
+    def get_attendance(
+        self,
+        property_id: Optional[str] = None,
+        date_str: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/attendance"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if date_str:
+            params["date_filter"] = date_str
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        d_val = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else None
+        return [a.model_dump() for a in hr_service.list_attendance(property_id=property_id, date_filter=d_val)]
+
+    def clock_in(self, clock_in_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/attendance/clock-in"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=clock_in_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import AttendanceClockInRequest
+        return hr_service.clock_in(AttendanceClockInRequest(**clock_in_data)).model_dump()
+
+    def clock_out(self, employee_id: str, clock_out_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/attendance/{employee_id}/clock-out"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=clock_out_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import AttendanceClockOutRequest
+        return hr_service.clock_out(employee_id, AttendanceClockOutRequest(**clock_out_data)).model_dump()
+
+    def get_leaves(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/leaves"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return [l.model_dump() for l in hr_service.list_leaves(property_id=property_id, status_filter=status)]
+
+    def create_leave_request(self, leave_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/leaves"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=leave_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import LeaveRequestCreate
+        return hr_service.create_leave_request(LeaveRequestCreate(**leave_data)).model_dump()
+
+    def review_leave_request(self, leave_id: str, review_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/leaves/{leave_id}/review"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=review_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import LeaveReviewRequest
+        return hr_service.review_leave_request(leave_id, LeaveReviewRequest(**review_data)).model_dump()
+
+    def get_payroll_runs(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/payroll/runs"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return [r.model_dump() for r in hr_service.list_payroll_runs(property_id=property_id)]
+
+    def get_payroll_run(self, run_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/payroll/runs/{run_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return hr_service.get_payroll_run(run_id).model_dump()
+
+    def create_payroll_run(self, run_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/payroll/runs"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=run_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        from backend.app.schemas.hr import PayrollRunCreate
+        return hr_service.create_payroll_run(PayrollRunCreate(**run_data)).model_dump()
+
+    def disburse_payroll_run(self, run_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/payroll/runs/{run_id}/disburse"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return hr_service.disburse_payroll_run(run_id).model_dump()
+
+    def get_employee_salary_structure(self, employee_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/employees/{employee_id}/salary-structure"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return hr_service.get_employee_salary_structure(employee_id).model_dump()
+
+    def get_hr_metrics(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hr/metrics"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hr_service import hr_service
+        return hr_service.get_hr_metrics().model_dump()
+
 
 api_client = ApiClient()
 

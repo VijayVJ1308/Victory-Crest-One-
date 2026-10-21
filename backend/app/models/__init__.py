@@ -53,6 +53,13 @@ from backend.app.models.inventory import (
     StockMovement,
     CycleCountSession
 )
+from backend.app.models.hr import (
+    Employee,
+    AttendanceRecord,
+    LeaveRequest,
+    PayrollRun,
+    Payslip
+)
 
 __all__ = [
     "Base",
@@ -98,7 +105,12 @@ __all__ = [
     "GoodsReceiptNote",
     "WarehouseStock",
     "StockMovement",
-    "CycleCountSession"
+    "CycleCountSession",
+    "Employee",
+    "AttendanceRecord",
+    "LeaveRequest",
+    "PayrollRun",
+    "Payslip"
 ]
 
 

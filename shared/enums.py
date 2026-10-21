@@ -320,6 +320,63 @@ class WarehouseType(str, Enum):
     MAINTENANCE = "MAINTENANCE"
 
 
+class EmploymentType(str, Enum):
+    FULL_TIME = "FULL_TIME"
+    PART_TIME = "PART_TIME"
+    CONTRACT = "CONTRACT"
+    INTERN = "INTERN"
+
+
+class EmployeeStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    ON_LEAVE = "ON_LEAVE"
+    PROBATION = "PROBATION"
+    TERMINATED = "TERMINATED"
+
+
+class AttendanceStatus(str, Enum):
+    PRESENT = "PRESENT"
+    ABSENT = "ABSENT"
+    HALF_DAY = "HALF_DAY"
+    LATE = "LATE"
+    ON_LEAVE = "ON_LEAVE"
+
+
+class LeaveType(str, Enum):
+    CASUAL = "CASUAL"
+    SICK = "SICK"
+    EARNED = "EARNED"
+    MATERNITY = "MATERNITY"
+    PATERNITY = "PATERNITY"
+    UNPAID = "UNPAID"
+
+
+class LeaveStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    CANCELLED = "CANCELLED"
+
+
+class PayrollRunStatus(str, Enum):
+    DRAFT = "DRAFT"
+    CALCULATED = "CALCULATED"
+    APPROVED = "APPROVED"
+    DISBURSED = "DISBURSED"
+    CANCELLED = "CANCELLED"
+
+
+class SalaryComponentType(str, Enum):
+    BASIC = "BASIC"
+    HRA = "HRA"
+    ALLOWANCE = "ALLOWANCE"
+    OVERTIME = "OVERTIME"
+    PF = "PF"
+    ESI = "ESI"
+    PROFESSIONAL_TAX = "PROFESSIONAL_TAX"
+    TDS = "TDS"
+
+
 
 
 

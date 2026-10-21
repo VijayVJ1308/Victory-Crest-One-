@@ -191,6 +191,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 6: Commerce & Point of Sale (POS)** (Cash register shifts, barcode lookup, hold/recall orders, split tenders, thermal receipts, automated GL journal posting)
 - [x] **Phase 7: Marketing Automation & Growth** (Multi-channel campaigns, audience segmentation, customer journeys, message templates, conversion attribution & ROAS)
 - [x] **Phase 8: Supply Chain, ERP & Warehouse Inventory** (Multi-warehouse stock balances, procurement Purchase Orders, Goods Receipt Notes with automated GL/AP posting, AVCO weighted average cost valuation, replenishment alerts, inter-warehouse transfers, and physical stocktaking cycle counts)
+- [x] **Phase 9: Human Resources & Payroll Management Engine** (Staff directory, biometric shift clock-in/out attendance, leave approval workflows, statutory salary structures with PF/ESI/PT/TDS, batch payroll computation, itemized payslips, and automated Finance GL salary disbursement posting: DR 6010, CR 2030, CR 1010)
 
 ---
 
@@ -202,15 +203,18 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**124 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, and inventory/AVCO calculations
+**137 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, and HR/payroll calculations
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, and Inventory
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, and HR/Payroll
 - **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack
 
 ---
 
-## 📅 Next Phase: Phase 9 — Manufacturing & Bill of Materials (BOM) / Hospitality PMS & Guest Folios
-- Multi-level Bill of Materials (BOM) and production work orders
-- Finished goods conversion and raw materials auto-consumption
-- Hospitality room rack, reservation engine, guest check-in/check-out, and folio night audits
+## 📅 Next Phase: Phase 10 — Customer & Field Service Management Engine
+- Support tickets with priority tiers and omnichannel ingestion
+- SLA tracking with resolution countdowns and escalation rules
+- Field work orders and technician dispatch scheduling
+- Spare parts and inventory requisitions linked to Phase 8 Warehouse Inventory
+- Billable labor & parts invoicing linked to Phase 4 Finance GL
+
