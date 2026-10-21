@@ -236,4 +236,42 @@ class PosTerminalStatus(str, Enum):
     MAINTENANCE = "MAINTENANCE"
 
 
+class CampaignStatus(str, Enum):
+    DRAFT = "DRAFT"
+    SCHEDULED = "SCHEDULED"
+    RUNNING = "RUNNING"
+    PAUSED = "PAUSED"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class CampaignChannel(str, Enum):
+    EMAIL = "EMAIL"
+    SMS = "SMS"
+    WHATSAPP = "WHATSAPP"
+    PUSH_NOTIFICATION = "PUSH_NOTIFICATION"
+    SOCIAL_MEDIA = "SOCIAL_MEDIA"
+    DIRECT_MAIL = "DIRECT_MAIL"
+
+
+class SegmentType(str, Enum):
+    DYNAMIC = "DYNAMIC"
+    STATIC = "STATIC"
+
+
+class JourneyStatus(str, Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    PAUSED = "PAUSED"
+    COMPLETED = "COMPLETED"
+
+
+class AttributionModel(str, Enum):
+    FIRST_TOUCH = "FIRST_TOUCH"
+    LAST_TOUCH = "LAST_TOUCH"
+    LINEAR = "LINEAR"
+    TIME_DECAY = "TIME_DECAY"
+
+
+
 

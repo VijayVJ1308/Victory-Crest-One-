@@ -811,8 +811,145 @@ class ApiClient:
         from backend.app.services.pos_service import pos_service
         return pos_service.get_pos_metrics().model_dump()
 
+    # ---------------------------------------------------------
+    # Marketing Automation Client Methods
+    # ---------------------------------------------------------
+    def get_marketing_campaigns(
+        self,
+        status: Optional[str] = None,
+        channel: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/campaigns"
+        params = {}
+        if status:
+            params["status"] = status
+        if channel:
+            params["channel"] = channel
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return [c.model_dump() for c in marketing_service.list_campaigns(status_filter=status, channel_filter=channel)]
+
+    def get_marketing_campaign(self, campaign_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/campaigns/{campaign_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return marketing_service.get_campaign(campaign_id).model_dump()
+
+    def create_marketing_campaign(self, campaign_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/campaigns"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=campaign_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        from backend.app.schemas.marketing import CampaignCreate
+        return marketing_service.create_campaign(CampaignCreate(**campaign_data)).model_dump()
+
+    def launch_marketing_campaign(self, campaign_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/campaigns/{campaign_id}/launch"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return marketing_service.launch_campaign(campaign_id).model_dump()
+
+    def get_audience_segments(self) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/segments"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return [s.model_dump() for s in marketing_service.list_segments()]
+
+    def create_audience_segment(self, segment_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/segments"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=segment_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        from backend.app.schemas.marketing import AudienceSegmentCreate
+        return marketing_service.create_segment(AudienceSegmentCreate(**segment_data)).model_dump()
+
+    def get_customer_journeys(self) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/journeys"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return [j.model_dump() for j in marketing_service.list_journeys()]
+
+    def get_campaign_templates(self, channel: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/templates"
+        params = {"channel": channel} if channel else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return [t.model_dump() for t in marketing_service.list_templates(channel=channel)]
+
+    def get_marketing_attributions(self, campaign_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/attributions"
+        params = {"campaign_id": campaign_id} if campaign_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return [a.model_dump() for a in marketing_service.list_attributions(campaign_id=campaign_id)]
+
+    def get_marketing_metrics(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/marketing/metrics"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.marketing_service import marketing_service
+        return marketing_service.get_marketing_metrics().model_dump()
+
 
 api_client = ApiClient()
+
 
 
 

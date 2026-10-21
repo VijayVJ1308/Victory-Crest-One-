@@ -25,6 +25,14 @@ from backend.app.schemas.pos import (
     PosOrderCreate, PosOrderHoldRequest, PosOrderTenderRequest, PosOrderOut,
     PosReceiptItem, PosReceiptOut, PosMetricsOut
 )
+from backend.app.schemas.marketing import (
+    CampaignCreate, CampaignUpdate, CampaignOut, CampaignDispatchResponse,
+    AudienceSegmentCreate, AudienceSegmentOut,
+    JourneyStep, CustomerJourneyCreate, CustomerJourneyOut,
+    CampaignTemplateCreate, CampaignTemplateOut,
+    AttributionCreate, AttributionOut,
+    MarketingMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -78,7 +86,21 @@ __all__ = [
     "PosOrderOut",
     "PosReceiptItem",
     "PosReceiptOut",
-    "PosMetricsOut"
+    "PosMetricsOut",
+    "CampaignCreate",
+    "CampaignUpdate",
+    "CampaignOut",
+    "CampaignDispatchResponse",
+    "AudienceSegmentCreate",
+    "AudienceSegmentOut",
+    "JourneyStep",
+    "CustomerJourneyCreate",
+    "CustomerJourneyOut",
+    "CampaignTemplateCreate",
+    "CampaignTemplateOut",
+    "AttributionCreate",
+    "AttributionOut",
+    "MarketingMetricsOut"
 ]
 
 

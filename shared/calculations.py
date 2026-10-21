@@ -345,4 +345,83 @@ def calculate_split_tenders(tender_list: list, total_amount: Number) -> tuple[De
     return tendered, remaining, is_paid
 
 
+def calculate_campaign_kpis(
+    delivered: Number,
+    opened: Number,
+    clicked: Number,
+    converted: Number,
+    spend: Number,
+    revenue: Number
+) -> dict:
+    """
+    Calculate comprehensive marketing campaign telemetry KPIs:
+    - Open Rate (%) = (Opened / Delivered) * 100
+    - Click-Through Rate (CTR %) = (Clicked / Delivered) * 100
+    - Click-to-Open Rate (CTOR %) = (Clicked / Opened) * 100
+    - Conversion Rate (%) = (Converted / Delivered) * 100
+    - Cost Per Acquisition (CPA) = Spend / Converted
+    - Return on Ad Spend (ROAS) = Revenue / Spend
+    - Return on Marketing Investment (ROMI %) = ((Revenue - Spend) / Spend) * 100
+    Safely handles all zero denominators with Decimal precision.
+    """
+    deliv = to_decimal(delivered)
+    open_cnt = to_decimal(opened)
+    clk_cnt = to_decimal(clicked)
+    conv_cnt = to_decimal(converted)
+    spd = to_decimal(spend)
+    rev = to_decimal(revenue)
+
+    open_rate = (
+        ((open_cnt / deliv) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if deliv > Decimal("0") else Decimal("0.00")
+    )
+
+    ctr = (
+        ((clk_cnt / deliv) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if deliv > Decimal("0") else Decimal("0.00")
+    )
+
+    ctor = (
+        ((clk_cnt / open_cnt) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if open_cnt > Decimal("0") else Decimal("0.00")
+    )
+
+    conversion_rate = (
+        ((conv_cnt / deliv) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if deliv > Decimal("0") else Decimal("0.00")
+    )
+
+    cpa = (
+        (spd / conv_cnt).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if conv_cnt > Decimal("0") else Decimal("0.00")
+    )
+
+    roas = (
+        (rev / spd).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if spd > Decimal("0") else Decimal("0.00")
+    )
+
+    romi_pct = (
+        (((rev - spd) / spd) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if spd > Decimal("0") else Decimal("0.00")
+    )
+
+    return {
+        "delivered": deliv,
+        "opened": open_cnt,
+        "clicked": clk_cnt,
+        "converted": conv_cnt,
+        "spend": spd,
+        "revenue": rev,
+        "open_rate_percent": open_rate,
+        "ctr_percent": ctr,
+        "ctor_percent": ctor,
+        "conversion_rate_percent": conversion_rate,
+        "cpa": cpa,
+        "roas": roas,
+        "romi_percent": romi_pct
+    }
+
+
+
 

@@ -42,8 +42,9 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📣",
         "description": "Campaigns, audience segmentation, customer journeys, and conversion attribution.",
         "phase": 7,
-        "status": "planned"
+        "status": "active"
     },
+
     {
         "id": "commerce",
         "name": "E-Commerce",

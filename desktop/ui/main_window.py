@@ -25,6 +25,7 @@ from desktop.ui.views.documents_view import DocumentsView
 from desktop.ui.views.finance_view import FinanceView
 from desktop.ui.views.crm_view import SalesCrmView
 from desktop.ui.views.pos_view import PosCommerceView
+from desktop.ui.views.marketing_view import MarketingView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -81,6 +82,7 @@ class MainWindow(QMainWindow):
         self.finance_view = FinanceView()
         self.crm_view = SalesCrmView()
         self.pos_view = PosCommerceView()
+        self.marketing_view = MarketingView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -91,6 +93,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.finance_view)            # index 6: finance & accounting
         self.view_stack.addWidget(self.crm_view)                # index 7: sales & crm
         self.view_stack.addWidget(self.pos_view)                # index 8: pos & commerce
+        self.view_stack.addWidget(self.marketing_view)          # index 9: marketing
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -140,7 +143,7 @@ class MainWindow(QMainWindow):
             ]),
             ("SALES & REVENUE", [
                 ("sales", "💼  Sales & CRM", "active"),
-                ("marketing", "📣  Marketing", "planned"),
+                ("marketing", "📣  Marketing", "active"),
                 ("commerce", "🛒  Commerce", "active"),
                 ("pos", "💳  Point of Sale", "active"),
             ]),
@@ -290,6 +293,8 @@ class MainWindow(QMainWindow):
             self.crm_view.refresh_data()
         if hasattr(self, "pos_view"):
             self.pos_view.refresh_data()
+        if hasattr(self, "marketing_view"):
+            self.marketing_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -403,6 +408,9 @@ class MainWindow(QMainWindow):
         elif key in ("pos", "commerce"):
             self.pos_view.refresh_data()
             self.view_stack.setCurrentIndex(8)
+        elif key == "marketing":
+            self.marketing_view.refresh_data()
+            self.view_stack.setCurrentIndex(9)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

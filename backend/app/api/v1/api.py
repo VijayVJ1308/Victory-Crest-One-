@@ -17,7 +17,8 @@ from backend.app.api.v1.endpoints import (
     notifications,
     finance,
     crm,
-    pos
+    pos,
+    marketing
 )
 
 api_router = APIRouter()
@@ -36,6 +37,8 @@ api_router.include_router(notifications.router, tags=["In-App Notifications"])
 api_router.include_router(finance.router, tags=["Finance & General Accounting"])
 api_router.include_router(crm.router, tags=["Sales CRM & Revenue Pipeline"])
 api_router.include_router(pos.router, tags=["Point of Sale & Commerce"])
+api_router.include_router(marketing.router, tags=["Marketing Automation"])
+
 
 
 

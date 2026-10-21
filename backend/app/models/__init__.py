@@ -37,6 +37,13 @@ from backend.app.models.pos import (
     PosOrderLine,
     PosPayment
 )
+from backend.app.models.marketing import (
+    MarketingCampaign,
+    AudienceSegment,
+    CustomerJourney,
+    CampaignTemplate,
+    CampaignAttribution
+)
 
 __all__ = [
     "Base",
@@ -70,8 +77,14 @@ __all__ = [
     "PosSession",
     "PosOrder",
     "PosOrderLine",
-    "PosPayment"
+    "PosPayment",
+    "MarketingCampaign",
+    "AudienceSegment",
+    "CustomerJourney",
+    "CampaignTemplate",
+    "CampaignAttribution"
 ]
+
 
 
 
