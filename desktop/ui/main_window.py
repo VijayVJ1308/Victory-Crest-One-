@@ -30,6 +30,7 @@ from desktop.ui.views.inventory_view import InventoryView
 from desktop.ui.views.hr_view import HrPayrollView
 from desktop.ui.views.service_view import ServiceManagementView
 from desktop.ui.views.hospitality_view import HospitalityView
+from desktop.ui.views.manufacturing_view import ManufacturingView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -91,6 +92,7 @@ class MainWindow(QMainWindow):
         self.hr_view = HrPayrollView()
         self.service_view = ServiceManagementView()
         self.hospitality_view = HospitalityView()
+        self.manufacturing_view = ManufacturingView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -106,6 +108,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.hr_view)                 # index 11: hr & payroll
         self.view_stack.addWidget(self.service_view)             # index 12: customer & field service
         self.view_stack.addWidget(self.hospitality_view)         # index 13: hospitality & dining
+        self.view_stack.addWidget(self.manufacturing_view)       # index 14: manufacturing & assets
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -164,6 +167,7 @@ class MainWindow(QMainWindow):
                 ("accounting", "📑  General Accounting", "active"),
                 ("erp", "📦  Supply Chain & ERP", "active"),
                 ("inventory", "🏭  Inventory & Warehouse", "active"),
+                ("manufacturing", "⚙️  Manufacturing & Assets", "active"),
                 ("service", "🛠️  Customer & Field Service", "active"),
                 ("projects", "📋  Project Management", "planned"),
             ]),
@@ -316,6 +320,8 @@ class MainWindow(QMainWindow):
             self.service_view.refresh_data()
         if hasattr(self, "hospitality_view"):
             self.hospitality_view.refresh_data()
+        if hasattr(self, "manufacturing_view"):
+            self.manufacturing_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -466,6 +472,10 @@ class MainWindow(QMainWindow):
             self.hospitality_view.refresh_data()
             self.hospitality_view.tabs.setCurrentIndex(3)  # Restaurant Dining & KDS
             self.view_stack.setCurrentIndex(13)
+        elif key == "manufacturing":
+            self.manufacturing_view.refresh_data()
+            self.manufacturing_view.tabs.setCurrentIndex(0)  # Production Orders
+            self.view_stack.setCurrentIndex(14)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

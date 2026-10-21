@@ -22,7 +22,8 @@ from backend.app.api.v1.endpoints import (
     inventory,
     hr,
     service,
-    hospitality
+    hospitality,
+    manufacturing
 )
 
 api_router = APIRouter()
@@ -46,6 +47,8 @@ api_router.include_router(inventory.router, tags=["Supply Chain, ERP & Inventory
 api_router.include_router(hr.router, tags=["Human Resources & Payroll"])
 api_router.include_router(service.router, tags=["Customer & Field Service"])
 api_router.include_router(hospitality.router, tags=["Hospitality PMS & Restaurant Dining"])
+api_router.include_router(manufacturing.router, tags=["Manufacturing & Production Orders"])
+
 
 
 

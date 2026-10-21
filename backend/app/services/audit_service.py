@@ -68,6 +68,30 @@ class AuditService:
             details=detail_str
         )
 
+    @classmethod
+    def log_action(
+        cls,
+        action: str,
+        entity_type: str,
+        entity_id: Optional[str] = None,
+        user_id: Optional[str] = "SYSTEM",
+        user_email: Optional[str] = "system@victorycrest.com",
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None,
+        details: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Convenience method for logging domain actions."""
+        return cls.record_event(
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_email=user_email,
+            organization_id=organization_id,
+            property_id=property_id,
+            details=details
+        )
+
     @staticmethod
     def get_logs(
         organization_id: Optional[str] = None,

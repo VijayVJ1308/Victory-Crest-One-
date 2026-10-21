@@ -65,6 +65,16 @@ from backend.app.schemas.hospitality import (
     DiningOrderCreate, DiningOrderSettleRequest, DiningOrderOut,
     HospitalityMetricsOut
 )
+from backend.app.schemas.manufacturing import (
+    WorkCenterBase, WorkCenterCreate, WorkCenterUpdate, WorkCenterOut,
+    BomComponentCreate, BomComponentOut,
+    BomOperationCreate, BomOperationOut,
+    BillOfMaterialsCreate, BillOfMaterialsUpdate, BillOfMaterialsOut,
+    MaterialUsageCreate, MaterialUsageOut,
+    QualityInspectionCreate, QualityInspectionOut,
+    ProductionOrderCreate, ProductionOrderStartRequest, ProductionOrderCompleteRequest, ProductionOrderOut,
+    ManufacturingMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -197,7 +207,27 @@ __all__ = [
     "DiningOrderCreate",
     "DiningOrderSettleRequest",
     "DiningOrderOut",
-    "HospitalityMetricsOut"
+    "HospitalityMetricsOut",
+    "WorkCenterBase",
+    "WorkCenterCreate",
+    "WorkCenterUpdate",
+    "WorkCenterOut",
+    "BomComponentCreate",
+    "BomComponentOut",
+    "BomOperationCreate",
+    "BomOperationOut",
+    "BillOfMaterialsCreate",
+    "BillOfMaterialsUpdate",
+    "BillOfMaterialsOut",
+    "MaterialUsageCreate",
+    "MaterialUsageOut",
+    "QualityInspectionCreate",
+    "QualityInspectionOut",
+    "ProductionOrderCreate",
+    "ProductionOrderStartRequest",
+    "ProductionOrderCompleteRequest",
+    "ProductionOrderOut",
+    "ManufacturingMetricsOut"
 ]
 
 

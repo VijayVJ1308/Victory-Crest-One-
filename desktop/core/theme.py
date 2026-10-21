@@ -12,6 +12,7 @@ class ThemeColors:
     BG_INPUT = "#0F172A"
     
     BORDER_LIGHT = "#1F293D"
+    BORDER_DEFAULT = "#1F293D"
     BORDER_SUBTLE = "#283548"
     BORDER_ACTIVE = "#3B82F6"
     

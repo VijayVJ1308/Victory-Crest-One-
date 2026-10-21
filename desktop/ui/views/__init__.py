@@ -15,6 +15,7 @@ from desktop.ui.views.inventory_view import InventoryView
 from desktop.ui.views.hr_view import HrPayrollView
 from desktop.ui.views.service_view import ServiceManagementView
 from desktop.ui.views.hospitality_view import HospitalityView
+from desktop.ui.views.manufacturing_view import ManufacturingView
 
 __all__ = [
     "DashboardView",
@@ -30,6 +31,7 @@ __all__ = [
     "InventoryView",
     "HrPayrollView",
     "ServiceManagementView",
-    "HospitalityView"
+    "HospitalityView",
+    "ManufacturingView"
 ]
 

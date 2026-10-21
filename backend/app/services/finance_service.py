@@ -48,6 +48,9 @@ def _seed_finance_data():
         ("1020", "Accounts Receivable (AR)", "ASSET", "DEBIT", True, "Customer receivables control account"),
         ("1030", "Petty Cash & Undeposited Funds", "ASSET", "DEBIT", True, "Cash registers and undeposited funds"),
         ("1200", "Inventory Asset", "ASSET", "DEBIT", True, "F&B, retail merchandise, and operating inventory"),
+        ("1210", "Raw Materials Inventory", "ASSET", "DEBIT", True, "Raw components, timber, metals, and ingredients"),
+        ("1220", "Work-in-Progress (WIP) Inventory", "ASSET", "DEBIT", True, "Semi-finished assemblies and active production runs"),
+        ("1230", "Finished Goods Inventory", "ASSET", "DEBIT", True, "Manufactured finished items ready for dispatch"),
         ("1500", "Property, Plant & Equipment", "ASSET", "DEBIT", False, "Buildings, vehicles, machinery, and fixtures"),
 
         # Liabilities (2000 - 2999)
@@ -68,6 +71,7 @@ def _seed_finance_data():
         # Cost of Goods Sold (5000 - 5999)
         ("5010", "Food & Beverage Cost of Sales", "COGS", "DEBIT", False, "Raw food materials, produce, and ingredients"),
         ("5020", "Retail Merchandise Cost of Sales", "COGS", "DEBIT", False, "Purchase cost of items sold in store"),
+        ("5030", "Manufacturing Direct Labor & Absorbed Overhead", "COGS", "DEBIT", False, "Factory labor, machine operation, and plant overhead"),
 
         # Operating Expenses (6000 - 6999)
         ("6010", "Payroll & Staff Compensation", "EXPENSE", "DEBIT", False, "Salaries, wages, overtime, and staff welfare"),
@@ -492,10 +496,15 @@ class FinanceService:
             entries = [e for e in entries if e["organization_id"] == organization_id]
         if entry_type:
             entries = [e for e in entries if e["entry_type"].lower() == entry_type.lower()]
-        if status_filter:
-            entries = [e for e in entries if e["status"].lower() == status_filter.lower()]
+        def _sort_key(x):
+            d = x.get("entry_date")
+            if d is None:
+                return datetime.min
+            if hasattr(d, "tzinfo") and d.tzinfo is not None:
+                return d.replace(tzinfo=None)
+            return d
 
-        return sorted(entries, key=lambda x: x["entry_date"], reverse=True)
+        return sorted(entries, key=_sort_key, reverse=True)
 
     def get_journal_entry_by_id(self, entry_id: str) -> Optional[Dict[str, Any]]:
         _seed_finance_data()

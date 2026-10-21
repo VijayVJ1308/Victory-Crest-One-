@@ -1826,8 +1826,195 @@ class ApiClient:
         from backend.app.services.hospitality_service import hospitality_service
         return hospitality_service.get_hospitality_metrics(property_id=property_id).model_dump()
 
+    # =========================================================================
+    # Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)
+    # =========================================================================
+
+    def get_work_centers(
+        self,
+        property_id: Optional[str] = None,
+        work_center_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/work-centers"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if work_center_type:
+            params["work_center_type"] = work_center_type
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return [wc.model_dump() for wc in manufacturing_service.list_work_centers(property_id=property_id, work_center_type=work_center_type)]
+
+    def create_work_center(self, wc_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/work-centers"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=wc_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import WorkCenterCreate
+        return manufacturing_service.create_work_center(WorkCenterCreate(**wc_data)).model_dump()
+
+    def get_boms(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/boms"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return [b.model_dump() for b in manufacturing_service.list_boms(property_id=property_id, status=status)]
+
+    def get_bom(self, bom_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/boms/{bom_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return manufacturing_service.get_bom(bom_id).model_dump()
+
+    def create_bom(self, bom_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/boms"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=bom_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import BillOfMaterialsCreate
+        return manufacturing_service.create_bom(BillOfMaterialsCreate(**bom_data)).model_dump()
+
+    def get_production_orders(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        priority: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if priority:
+            params["priority"] = priority
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return [o.model_dump() for o in manufacturing_service.list_production_orders(property_id=property_id, status=status, priority=priority)]
+
+    def get_production_order(self, order_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders/{order_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return manufacturing_service.get_production_order(order_id).model_dump()
+
+    def create_production_order(self, order_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=order_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import ProductionOrderCreate
+        return manufacturing_service.create_production_order(ProductionOrderCreate(**order_data)).model_dump()
+
+    def start_production_order(self, order_id: str, start_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders/{order_id}/start"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=start_data or {})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import ProductionOrderStartRequest
+        req = ProductionOrderStartRequest(**start_data) if start_data else None
+        return manufacturing_service.start_production_order(order_id, req).model_dump()
+
+    def complete_production_order(self, order_id: str, complete_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders/{order_id}/complete"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=complete_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import ProductionOrderCompleteRequest
+        return manufacturing_service.complete_production_order(order_id, ProductionOrderCompleteRequest(**complete_data)).model_dump()
+
+    def record_quality_inspection(self, order_id: str, inspection_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/production-orders/{order_id}/inspections"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=inspection_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        from backend.app.schemas.manufacturing import QualityInspectionCreate
+        return manufacturing_service.record_quality_inspection(order_id, QualityInspectionCreate(**inspection_data)).model_dump()
+
+    def get_manufacturing_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/manufacturing/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.manufacturing_service import manufacturing_service
+        return manufacturing_service.get_manufacturing_metrics(property_id=property_id).model_dump()
+
 
 api_client = ApiClient()
+
 
 
 

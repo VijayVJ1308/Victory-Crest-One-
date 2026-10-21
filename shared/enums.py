@@ -481,6 +481,47 @@ class KdsOrderStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+# ============================================================================
+# Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)
+# ============================================================================
+
+class WorkCenterStatus(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    BUSY = "BUSY"
+    MAINTENANCE = "MAINTENANCE"
+    OFFLINE = "OFFLINE"
+
+
+class BomStatus(str, Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    ARCHIVED = "ARCHIVED"
+
+
+class ProductionOrderStatus(str, Enum):
+    DRAFT = "DRAFT"
+    PLANNED = "PLANNED"
+    IN_PROGRESS = "IN_PROGRESS"
+    QUALITY_CHECK = "QUALITY_CHECK"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class ProductionPriority(str, Enum):
+    LOW = "LOW"
+    NORMAL = "NORMAL"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+
+
+class QualityStatus(str, Enum):
+    PENDING = "PENDING"
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    CONDITIONAL = "CONDITIONAL"
+
+
+
 
 
 

@@ -76,6 +76,15 @@ from backend.app.models.hospitality import (
     DiningOrder,
     DiningOrderItem
 )
+from backend.app.models.manufacturing import (
+    WorkCenter,
+    BillOfMaterials,
+    BomComponent,
+    BomOperation,
+    ProductionOrder,
+    ProductionMaterialUsage,
+    QualityInspection
+)
 
 __all__ = [
     "Base",
@@ -138,7 +147,14 @@ __all__ = [
     "FolioLine",
     "DiningTable",
     "DiningOrder",
-    "DiningOrderItem"
+    "DiningOrderItem",
+    "WorkCenter",
+    "BillOfMaterials",
+    "BomComponent",
+    "BomOperation",
+    "ProductionOrder",
+    "ProductionMaterialUsage",
+    "QualityInspection"
 ]
 
 

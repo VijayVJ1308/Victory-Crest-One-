@@ -913,6 +913,202 @@ def calculate_dining_bill_totals(
     }
 
 
+# ============================================================================
+# Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)
+# ============================================================================
+
+def calculate_bom_line_cost(
+    quantity_required: Number,
+    unit_cost: Number,
+    scrap_percent: Number = 0
+) -> dict:
+    """
+    Calculate BOM component cost including scrap / shrinkage allowance:
+    base_cost = quantity_required * unit_cost
+    scrap_cost = base_cost * (scrap_percent / 100)
+    total_line_cost = base_cost + scrap_cost
+    """
+    qty = max(Decimal("0.00"), to_decimal(quantity_required))
+    cost = max(Decimal("0.00"), to_decimal(unit_cost))
+    scrap_pct = max(Decimal("0.00"), to_decimal(scrap_percent))
+
+    base_cost = (qty * cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    scrap_cost = (base_cost * (scrap_pct / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_line_cost = (base_cost + scrap_cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "quantity_required": qty,
+        "unit_cost": cost,
+        "scrap_percent": scrap_pct,
+        "base_cost": base_cost,
+        "scrap_cost": scrap_cost,
+        "total_line_cost": total_line_cost
+    }
+
+
+def calculate_bom_totals(
+    components: list,
+    operations: list,
+    batch_quantity: Number = 1
+) -> dict:
+    """
+    Calculate full Bill of Materials totals:
+    - Sum of component material costs with scrap
+    - Sum of routing operations labor and machine costs: (setup_hours + run_hours_per_unit * batch_qty) * hourly_rate
+    - Total BOM cost and Unit Cost per finished product.
+    """
+    batch_qty = max(Decimal("1.00"), to_decimal(batch_quantity))
+    tot_materials = Decimal("0.00")
+    tot_scrap = Decimal("0.00")
+
+    for c in components:
+        if isinstance(c, dict):
+            qty = to_decimal(c.get("quantity", 0))
+            cost = to_decimal(c.get("unit_cost", 0))
+            scrap = to_decimal(c.get("scrap_percent", 0))
+        else:
+            qty = to_decimal(getattr(c, "quantity", 0))
+            cost = to_decimal(getattr(c, "unit_cost", 0))
+            scrap = to_decimal(getattr(c, "scrap_percent", 0))
+
+        line_res = calculate_bom_line_cost(qty, cost, scrap)
+        tot_materials += line_res["base_cost"]
+        tot_scrap += line_res["scrap_cost"]
+
+    tot_material_with_scrap = tot_materials + tot_scrap
+
+    tot_operations = Decimal("0.00")
+    for op in operations:
+        if isinstance(op, dict):
+            setup = to_decimal(op.get("setup_time_hours", 0))
+            run_unit = to_decimal(op.get("run_time_per_unit_hours", 0))
+            rate = to_decimal(op.get("hourly_rate", 0))
+        else:
+            setup = to_decimal(getattr(op, "setup_time_hours", 0))
+            run_unit = to_decimal(getattr(op, "run_time_per_unit_hours", 0))
+            rate = to_decimal(getattr(op, "hourly_rate", 0))
+
+        total_op_hours = setup + (run_unit * batch_qty)
+        op_cost = (total_op_hours * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        tot_operations += op_cost
+
+    tot_bom_cost = (tot_material_with_scrap + tot_operations).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    unit_cost = (tot_bom_cost / batch_qty).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "batch_quantity": batch_qty,
+        "base_material_cost": tot_materials.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "scrap_material_cost": tot_scrap.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_material_cost": tot_material_with_scrap.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_operations_cost": tot_operations.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_bom_cost": tot_bom_cost,
+        "unit_cost": unit_cost
+    }
+
+
+def calculate_production_order_cost(
+    actual_materials: list,
+    actual_labor_hours: Number,
+    labor_hourly_rate: Number,
+    overhead_cost: Number = 0,
+    produced_quantity: Number = 1
+) -> dict:
+    """
+    Calculate actual manufacturing work order cost upon completion:
+    Total Cost = Materials Consumed + (Labor Hours * Rate) + Allocated Overhead
+    Unit Finished Goods Cost = Total Cost / Max(1, Produced Quantity)
+    """
+    produced_qty = max(Decimal("1.00"), to_decimal(produced_quantity))
+    tot_mat = Decimal("0.00")
+
+    for m in actual_materials:
+        if isinstance(m, dict):
+            cost = to_decimal(m.get("total_cost", 0))
+            if cost == Decimal("0.00") and "quantity" in m and "unit_cost" in m:
+                cost = to_decimal(m["quantity"]) * to_decimal(m["unit_cost"])
+        else:
+            cost = to_decimal(getattr(m, "total_cost", 0))
+            if cost == Decimal("0.00") and hasattr(m, "quantity") and hasattr(m, "unit_cost"):
+                cost = to_decimal(getattr(m, "quantity", 0)) * to_decimal(getattr(m, "unit_cost", 0))
+        tot_mat += cost
+
+    hours = max(Decimal("0.00"), to_decimal(actual_labor_hours))
+    rate = max(Decimal("0.00"), to_decimal(labor_hourly_rate))
+    labor = (hours * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    overhead = max(Decimal("0.00"), to_decimal(overhead_cost)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    total_actual = (tot_mat + labor + overhead).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    unit_cost = (total_actual / produced_qty).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "material_cost": tot_mat.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "labor_cost": labor,
+        "overhead_cost": overhead,
+        "total_actual_cost": total_actual,
+        "unit_actual_cost": unit_cost,
+        "produced_quantity": produced_qty
+    }
+
+
+def calculate_manufacturing_kpis(
+    orders: list,
+    total_capacity_hours: Number = 0,
+    actual_hours_used: Number = 0
+) -> dict:
+    """
+    Calculate manufacturing executive KPIs:
+    - Total Orders, Completed Orders, In-Progress Orders
+    - Total Units Produced & Rejected
+    - Scrap Rate % = Rejected / (Produced + Rejected) * 100
+    - Capacity Utilization % = (Actual Hours / Total Capacity) * 100
+    """
+    tot_orders = len(orders)
+    completed_orders = 0
+    in_progress_orders = 0
+    tot_produced = Decimal("0.00")
+    tot_rejected = Decimal("0.00")
+    tot_wip_value = Decimal("0.00")
+
+    for o in orders:
+        st = str(o.get("status", "") if isinstance(o, dict) else getattr(o, "status", "")).upper()
+        p_qty = to_decimal(o.get("produced_quantity", 0) if isinstance(o, dict) else getattr(o, "produced_quantity", 0))
+        r_qty = to_decimal(o.get("rejected_quantity", 0) if isinstance(o, dict) else getattr(o, "rejected_quantity", 0))
+        cost = to_decimal(o.get("total_actual_cost", 0) if isinstance(o, dict) else getattr(o, "total_actual_cost", 0))
+
+        if st == "COMPLETED":
+            completed_orders += 1
+            tot_produced += p_qty
+            tot_rejected += r_qty
+        elif st in ("IN_PROGRESS", "QUALITY_CHECK"):
+            in_progress_orders += 1
+            tot_wip_value += cost
+
+    total_units = tot_produced + tot_rejected
+    if total_units > Decimal("0.00"):
+        scrap_rate = ((tot_rejected / total_units) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        scrap_rate = Decimal("0.00")
+
+    cap_hrs = to_decimal(total_capacity_hours)
+    used_hrs = to_decimal(actual_hours_used)
+    if cap_hrs > Decimal("0.00"):
+        capacity_util = ((used_hrs / cap_hrs) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        capacity_util = Decimal("0.00")
+
+    return {
+        "total_orders": tot_orders,
+        "completed_orders": completed_orders,
+        "in_progress_orders": in_progress_orders,
+        "total_produced_units": tot_produced,
+        "total_rejected_units": tot_rejected,
+        "scrap_rate_percent": scrap_rate,
+        "total_wip_value": tot_wip_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "capacity_utilization_percent": capacity_util
+    }
+
+
+
 
 
 

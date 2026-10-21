@@ -194,6 +194,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 9: Human Resources & Payroll Management Engine** (Staff directory, biometric shift clock-in/out attendance, leave approval workflows, statutory salary structures with PF/ESI/PT/TDS, batch payroll computation, itemized payslips, and automated Finance GL salary disbursement posting: DR 6010, CR 2030, CR 1010)
 - [x] **Phase 10: Customer & Field Service Management Engine** (Omnichannel support incident ticketing, P1-P4 SLA tracking with real-time breach countdowns, field work order scheduling, technician dispatches, warehouse spare parts requisitions, and automated double-entry GL invoicing: DR 1020, CR 4040, CR 2020)
 - [x] **Phase 11: Hospitality & Resort PMS / Restaurant Dining Management** (Multi-property room rack & availability grid, room types, dynamic rate plans, reservations engine, express check-in/out, running guest folios with incidental postings, housekeeping room status transitions, restaurant dining tables floorplan, Kitchen Display System (KDS) order lifecycle, room folio transfer billing, and automated Finance GL night audit revenue recognition: DR 1020, CR 4010, CR 2020)
+- [x] **Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)** (Manufacturing work centers, multi-level Bills of Materials with scrap allowance, routing labor & machine steps, production orders with live state transitions, quality inspection checkpoints, WIP valuation, and automated double-entry GL inventory absorption: DR 1230 Finished Goods Inventory, CR 1210 Raw Materials Inventory, CR 5030 Manufacturing Direct Labor & Overhead)
 
 ---
 
@@ -205,18 +206,19 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**169 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, and resort folio/night audit calculations
+**184 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, and manufacturing BOM/scrap calculations
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, and Hospitality PMS
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, and Manufacturing Orders
 - **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack
 
 ---
 
-## 📅 Next Phase: Phase 12 — Manufacturing & Production Orders / Bill of Materials (BOM)
-- Multi-level Bills of Materials (BOM), raw material item explosion, and scrap percentage allowance
-- Production orders (discrete and process manufacturing), work centers, routing steps, and capacity scheduling
-- WIP (Work-in-Progress) valuation, automated raw material inventory consumption, and finished goods receipting
-- Automated double-entry Finance GL manufacturing accounting (DR 1040 WIP / DR 1030 Finished Goods Inventory, CR 1030 Raw Material Inventory, CR 5010 Manufacturing Overhead)
+## 📅 Next Phase: Phase 13 — Project Management & Professional Services (PSA)
+- Work Breakdown Structure (WBS), milestones, task hierarchies, and Gantt timeline scheduling
+- Resource allocation, capacity planning, and staff project assignments
+- Billable and non-billable timesheets, expense logging, and project budget burn rate tracking
+- Automated milestone-based Customer Invoicing and GL revenue recognition (DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue)
+
 
 
