@@ -4,6 +4,7 @@ Decimal-safe and zero-division-protected calculation functions for KPIs, hospita
 
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Union, Optional
+from datetime import datetime, timezone
 
 Number = Union[int, float, Decimal]
 
@@ -696,6 +697,130 @@ def calculate_attendance_rate(total_rostered_shifts: int, present_shifts: int) -
     if total_rostered_shifts <= 0:
         return Decimal("100.00")
     rate = (Decimal(str(present_shifts)) / Decimal(str(total_rostered_shifts))) * Decimal("100.00")
+    return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_service_labor_cost(
+    labor_hours: Number,
+    hourly_rate: Number,
+    overtime_hours: Number = 0,
+    overtime_multiplier: Number = 1.5
+) -> Decimal:
+    """
+    Calculate total labor cost for service technicians:
+    Regular Labor = hours * hourly_rate
+    Overtime Labor = overtime_hours * hourly_rate * overtime_multiplier
+    """
+    hours = to_decimal(labor_hours)
+    rate = to_decimal(hourly_rate)
+    ot_hrs = to_decimal(overtime_hours)
+    ot_mult = to_decimal(overtime_multiplier)
+
+    if hours < Decimal("0"):
+        hours = Decimal("0")
+    if rate < Decimal("0"):
+        rate = Decimal("0")
+    if ot_hrs < Decimal("0"):
+        ot_hrs = Decimal("0")
+
+    regular_cost = hours * rate
+    ot_cost = ot_hrs * rate * ot_mult
+    total = regular_cost + ot_cost
+    return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_work_order_totals(
+    labor_total: Number,
+    parts_total: Number,
+    tax_rate_percent: Number = 18.0
+) -> dict:
+    """
+    Calculate subtotal, tax, and grand total for a field work order or service job.
+    """
+    labor = to_decimal(labor_total)
+    parts = to_decimal(parts_total)
+    tax_rate = to_decimal(tax_rate_percent)
+
+    if labor < Decimal("0"):
+        labor = Decimal("0.00")
+    if parts < Decimal("0"):
+        parts = Decimal("0.00")
+    if tax_rate < Decimal("0"):
+        tax_rate = Decimal("0.00")
+
+    subtotal = (labor + parts).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    tax_amount = (subtotal * (tax_rate / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    grand_total = (subtotal + tax_amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "labor_total": labor.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "parts_total": parts.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "subtotal": subtotal,
+        "tax_rate_percent": tax_rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "tax_amount": tax_amount,
+        "grand_total": grand_total
+    }
+
+
+def calculate_sla_remaining_hours(
+    created_at: datetime,
+    sla_target_hours: Number,
+    current_time: Optional[datetime] = None
+) -> tuple[Decimal, bool]:
+    """
+    Calculate remaining hours until SLA breach.
+    Returns: (remaining_hours, is_breached)
+    """
+    if current_time is None:
+        current_time = datetime.now(timezone.utc)
+    
+    # Handle timezone differences if any
+    if created_at.tzinfo is None and current_time.tzinfo is not None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    elif created_at.tzinfo is not None and current_time.tzinfo is None:
+        current_time = current_time.replace(tzinfo=timezone.utc)
+
+    target_hours = to_decimal(sla_target_hours)
+    elapsed_seconds = (current_time - created_at).total_seconds()
+    if elapsed_seconds < 0:
+        elapsed_seconds = 0
+    elapsed_hours = Decimal(str(elapsed_seconds)) / Decimal("3600")
+
+    remaining = target_hours - elapsed_hours
+    is_breached = remaining <= Decimal("0.00")
+    return (remaining.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), is_breached)
+
+
+def calculate_sla_compliance_rate(total_resolved: int, breached_count: int) -> Decimal:
+    """
+    Calculate percentage of tickets resolved within SLA:
+    Compliance % = ((Total Resolved - Breached) / Total Resolved) * 100
+    """
+    if total_resolved <= 0:
+        return Decimal("100.00")
+    if breached_count >= total_resolved:
+        return Decimal("0.00")
+    if breached_count < 0:
+        breached_count = 0
+
+    met = Decimal(str(total_resolved - breached_count))
+    rate = (met / Decimal(str(total_resolved))) * Decimal("100.00")
+    return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_first_contact_resolution_rate(total_tickets: int, fcr_count: int) -> Decimal:
+    """
+    Calculate First Contact Resolution (FCR) rate:
+    FCR % = (FCR Count / Total Tickets) * 100
+    """
+    if total_tickets <= 0:
+        return Decimal("0.00")
+    if fcr_count < 0:
+        fcr_count = 0
+    if fcr_count > total_tickets:
+        fcr_count = total_tickets
+
+    rate = (Decimal(str(fcr_count)) / Decimal(str(total_tickets))) * Decimal("100.00")
     return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 

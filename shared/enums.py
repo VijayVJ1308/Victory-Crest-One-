@@ -377,6 +377,57 @@ class SalaryComponentType(str, Enum):
     TDS = "TDS"
 
 
+class TicketPriority(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+    CRITICAL = "CRITICAL"
+
+
+class TicketStatus(str, Enum):
+    NEW = "NEW"
+    OPEN = "OPEN"
+    IN_PROGRESS = "IN_PROGRESS"
+    PENDING_PARTS = "PENDING_PARTS"
+    RESOLVED = "RESOLVED"
+    CLOSED = "CLOSED"
+
+
+class TicketChannel(str, Enum):
+    PORTAL = "PORTAL"
+    EMAIL = "EMAIL"
+    PHONE = "PHONE"
+    CHAT = "CHAT"
+    ON_SITE = "ON_SITE"
+    IOT_ALARM = "IOT_ALARM"
+
+
+class WorkOrderStatus(str, Enum):
+    SCHEDULED = "SCHEDULED"
+    DISPATCHED = "DISPATCHED"
+    ON_SITE = "ON_SITE"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class ServiceType(str, Enum):
+    WARRANTY = "WARRANTY"
+    PREVENTIVE_MAINTENANCE = "PREVENTIVE_MAINTENANCE"
+    EMERGENCY_REPAIR = "EMERGENCY_REPAIR"
+    INSTALLATION = "INSTALLATION"
+    AMC = "AMC"
+
+
+class PartRequisitionStatus(str, Enum):
+    REQUESTED = "REQUESTED"
+    APPROVED = "APPROVED"
+    ISSUED = "ISSUED"
+    CONSUMED = "CONSUMED"
+    RETURNED = "RETURNED"
+
+
 
 
 

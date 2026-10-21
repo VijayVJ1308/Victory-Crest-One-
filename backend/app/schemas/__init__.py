@@ -50,6 +50,13 @@ from backend.app.schemas.hr import (
     SalaryBreakdownOut, PayslipOut, PayrollRunCreate, PayrollRunOut,
     HrMetricsOut
 )
+from backend.app.schemas.service import (
+    SLAPolicyOut,
+    SupportTicketBase, SupportTicketCreate, SupportTicketUpdate, SupportTicketOut,
+    WorkOrderPartBase, WorkOrderPartCreate, WorkOrderPartOut,
+    FieldWorkOrderBase, FieldWorkOrderCreate, FieldWorkOrderDispatch, FieldWorkOrderComplete, FieldWorkOrderOut,
+    ServiceMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -152,7 +159,21 @@ __all__ = [
     "PayslipOut",
     "PayrollRunCreate",
     "PayrollRunOut",
-    "HrMetricsOut"
+    "HrMetricsOut",
+    "SLAPolicyOut",
+    "SupportTicketBase",
+    "SupportTicketCreate",
+    "SupportTicketUpdate",
+    "SupportTicketOut",
+    "WorkOrderPartBase",
+    "WorkOrderPartCreate",
+    "WorkOrderPartOut",
+    "FieldWorkOrderBase",
+    "FieldWorkOrderCreate",
+    "FieldWorkOrderDispatch",
+    "FieldWorkOrderComplete",
+    "FieldWorkOrderOut",
+    "ServiceMetricsOut"
 ]
 
 

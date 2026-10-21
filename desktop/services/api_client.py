@@ -1382,6 +1382,214 @@ class ApiClient:
         from backend.app.services.hr_service import hr_service
         return hr_service.get_hr_metrics().model_dump()
 
+    # ---------------------------------------------------------
+    # Customer & Field Service Management
+    # ---------------------------------------------------------
+    def get_service_sla_policies(self) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/sla-policies"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return [p.model_dump() for p in service_management_service.get_sla_policies()]
+
+    def get_service_tickets(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+        search: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/tickets"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if priority:
+            params["priority"] = priority
+        if search:
+            params["search"] = search
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return [
+            t.model_dump()
+            for t in service_management_service.get_tickets(
+                property_id=property_id,
+                status_filter=status,
+                priority_filter=priority,
+                search_query=search
+            )
+        ]
+
+    def create_service_ticket(self, ticket_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/tickets"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=ticket_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import SupportTicketCreate
+        return service_management_service.create_ticket(SupportTicketCreate(**ticket_data)).model_dump()
+
+    def get_service_ticket(self, ticket_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/tickets/{ticket_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return service_management_service.get_ticket(ticket_id).model_dump()
+
+    def update_service_ticket(self, ticket_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/tickets/{ticket_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json=update_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import SupportTicketUpdate
+        return service_management_service.update_ticket(ticket_id, SupportTicketUpdate(**update_data)).model_dump()
+
+    def get_field_work_orders(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        search: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if search:
+            params["search"] = search
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return [
+            w.model_dump()
+            for w in service_management_service.get_work_orders(
+                property_id=property_id,
+                status_filter=status,
+                search_query=search
+            )
+        ]
+
+    def create_field_work_order(self, wo_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=wo_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import FieldWorkOrderCreate
+        return service_management_service.create_work_order(FieldWorkOrderCreate(**wo_data)).model_dump()
+
+    def get_field_work_order(self, wo_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders/{wo_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return service_management_service.get_work_order(wo_id).model_dump()
+
+    def dispatch_work_order(self, wo_id: str, dispatch_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders/{wo_id}/dispatch"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=dispatch_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import FieldWorkOrderDispatch
+        return service_management_service.dispatch_work_order(wo_id, FieldWorkOrderDispatch(**dispatch_data)).model_dump()
+
+    def add_work_order_part(self, wo_id: str, part_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders/{wo_id}/parts"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=part_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import WorkOrderPartCreate
+        return service_management_service.add_work_order_part(wo_id, WorkOrderPartCreate(**part_data)).model_dump()
+
+    def issue_work_order_part(self, wo_id: str, part_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders/{wo_id}/parts/{part_id}/issue"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return service_management_service.issue_work_order_part(wo_id, part_id).model_dump()
+
+    def complete_and_bill_work_order(self, wo_id: str, complete_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/work-orders/{wo_id}/complete-and-bill"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=complete_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        from backend.app.schemas.service import FieldWorkOrderComplete
+        return service_management_service.complete_and_bill_work_order(wo_id, FieldWorkOrderComplete(**complete_data)).model_dump()
+
+    def get_service_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/service/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.service_management import service_management_service
+        return service_management_service.get_service_metrics(property_id=property_id).model_dump()
+
 
 api_client = ApiClient()
 

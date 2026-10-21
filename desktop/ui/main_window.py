@@ -28,6 +28,7 @@ from desktop.ui.views.pos_view import PosCommerceView
 from desktop.ui.views.marketing_view import MarketingView
 from desktop.ui.views.inventory_view import InventoryView
 from desktop.ui.views.hr_view import HrPayrollView
+from desktop.ui.views.service_view import ServiceManagementView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -87,6 +88,7 @@ class MainWindow(QMainWindow):
         self.marketing_view = MarketingView()
         self.inventory_view = InventoryView()
         self.hr_view = HrPayrollView()
+        self.service_view = ServiceManagementView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -100,6 +102,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.marketing_view)          # index 9: marketing
         self.view_stack.addWidget(self.inventory_view)          # index 10: inventory & erp
         self.view_stack.addWidget(self.hr_view)                 # index 11: hr & payroll
+        self.view_stack.addWidget(self.service_view)             # index 12: customer & field service
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -158,7 +161,7 @@ class MainWindow(QMainWindow):
                 ("accounting", "📑  General Accounting", "active"),
                 ("erp", "📦  Supply Chain & ERP", "active"),
                 ("inventory", "🏭  Inventory & Warehouse", "active"),
-                ("service", "🛠️  Customer & Field Service", "planned"),
+                ("service", "🛠️  Customer & Field Service", "active"),
                 ("projects", "📋  Project Management", "planned"),
             ]),
             ("HOSPITALITY & DINING", [
@@ -306,12 +309,21 @@ class MainWindow(QMainWindow):
             self.inventory_view.refresh_data()
         if hasattr(self, "hr_view"):
             self.hr_view.refresh_data()
+        if hasattr(self, "service_view"):
+            self.service_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
         is_online, health_data = api_client.check_health()
         if is_online:
-            db_conn = health_data.get("database", {}).get("is_connected", False)
+            db_val = health_data.get("database", {})
+            if isinstance(db_val, str):
+                db_conn = db_val.lower() in ("connected", "healthy", "ok", "true")
+            elif isinstance(db_val, dict):
+                db_conn = db_val.get("is_connected", False)
+            else:
+                db_conn = False
+
             if db_conn:
                 self.conn_status_badge.set_status("CENTRAL ONLINE", "connected")
             else:
@@ -438,6 +450,9 @@ class MainWindow(QMainWindow):
             self.hr_view.refresh_data()
             self.hr_view.tabs.setCurrentIndex(3)  # Payroll Processing
             self.view_stack.setCurrentIndex(11)
+        elif key == "service":
+            self.service_view.refresh_data()
+            self.view_stack.setCurrentIndex(12)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

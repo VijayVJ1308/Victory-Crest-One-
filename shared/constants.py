@@ -116,7 +116,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🛠️",
         "description": "Support tickets, SLA tracking, field work orders, technician scheduling, and parts.",
         "phase": 10,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "hotel",

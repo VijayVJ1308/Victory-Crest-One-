@@ -204,14 +204,26 @@ class DashboardView(QWidget):
 
         if is_online:
             db_data = health_info.get("database", {})
-            db_conn = db_data.get("is_connected", False)
-            db_status = "Connected" if db_conn else "Disconnected"
-            latency = db_data.get("latency_ms", "N/A")
+            if isinstance(db_data, str):
+                db_conn = db_data.lower() in ("connected", "healthy", "ok", "true")
+                db_status = db_data.capitalize()
+                db_engine = "PostgreSQL"
+                latency = "N/A"
+            elif isinstance(db_data, dict):
+                db_conn = db_data.get("is_connected", False)
+                db_status = "Connected" if db_conn else "Disconnected"
+                db_engine = db_data.get('engine', 'PostgreSQL')
+                latency = db_data.get("latency_ms", "N/A")
+            else:
+                db_conn = False
+                db_status = "Unknown"
+                db_engine = "PostgreSQL"
+                latency = "N/A"
 
             icon_lbl = QLabel("🟢")
             info_lbl = QLabel(
                 f"<b>Central Backend Online:</b> FastAPI active • "
-                f"PostgreSQL Database: <b>{db_status}</b> ({db_data.get('engine', 'PostgreSQL')}, {latency} ms latency) • "
+                f"PostgreSQL Database: <b>{db_status}</b> ({db_engine}, {latency} ms latency) • "
                 f"Offline SQLite Cache: <b>Ready</b>"
             )
             info_lbl.setStyleSheet(f"color: {ThemeColors.TEXT_MAIN}; font-size: 12px;")

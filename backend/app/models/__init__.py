@@ -60,6 +60,12 @@ from backend.app.models.hr import (
     PayrollRun,
     Payslip
 )
+from backend.app.models.service import (
+    SLAPolicy,
+    SupportTicket,
+    FieldWorkOrder,
+    WorkOrderPart
+)
 
 __all__ = [
     "Base",
@@ -110,7 +116,11 @@ __all__ = [
     "AttendanceRecord",
     "LeaveRequest",
     "PayrollRun",
-    "Payslip"
+    "Payslip",
+    "SLAPolicy",
+    "SupportTicket",
+    "FieldWorkOrder",
+    "WorkOrderPart"
 ]
 
 
