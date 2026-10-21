@@ -57,6 +57,14 @@ from backend.app.schemas.service import (
     FieldWorkOrderBase, FieldWorkOrderCreate, FieldWorkOrderDispatch, FieldWorkOrderComplete, FieldWorkOrderOut,
     ServiceMetricsOut
 )
+from backend.app.schemas.hospitality import (
+    RoomTypeOut, RoomCreate, RoomOut,
+    ReservationCreate, ReservationCheckInRequest, ReservationOut,
+    FolioLineCreate, FolioLineOut, GuestFolioOut,
+    DiningTableOut, DiningOrderItemCreate, DiningOrderItemOut,
+    DiningOrderCreate, DiningOrderSettleRequest, DiningOrderOut,
+    HospitalityMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -173,7 +181,23 @@ __all__ = [
     "FieldWorkOrderDispatch",
     "FieldWorkOrderComplete",
     "FieldWorkOrderOut",
-    "ServiceMetricsOut"
+    "ServiceMetricsOut",
+    "RoomTypeOut",
+    "RoomCreate",
+    "RoomOut",
+    "ReservationCreate",
+    "ReservationCheckInRequest",
+    "ReservationOut",
+    "FolioLineCreate",
+    "FolioLineOut",
+    "GuestFolioOut",
+    "DiningTableOut",
+    "DiningOrderItemCreate",
+    "DiningOrderItemOut",
+    "DiningOrderCreate",
+    "DiningOrderSettleRequest",
+    "DiningOrderOut",
+    "HospitalityMetricsOut"
 ]
 
 

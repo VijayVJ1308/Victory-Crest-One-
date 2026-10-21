@@ -1590,6 +1590,242 @@ class ApiClient:
         from backend.app.services.service_management import service_management_service
         return service_management_service.get_service_metrics(property_id=property_id).model_dump()
 
+    # ---------------------------------------------------------
+    # Hospitality & Resort PMS / Restaurant Dining
+    # ---------------------------------------------------------
+    def get_room_types(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/room-types"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [rt.model_dump() for rt in hospitality_service.get_room_types(property_id=property_id)]
+
+    def get_rooms(self, property_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/rooms"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [r.model_dump() for r in hospitality_service.get_rooms(property_id=property_id, status_filter=status)]
+
+    def create_room(self, room_data: Dict[str, Any], property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/rooms"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=room_data, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import RoomCreate
+        return hospitality_service.create_room(RoomCreate(**room_data), property_id=property_id).model_dump()
+
+    def update_room_status(self, room_id: str, new_status: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/rooms/{room_id}/status"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json={"status": new_status})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return hospitality_service.update_room_status(room_id, new_status).model_dump()
+
+    def get_reservations(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        search: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/reservations"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if search:
+            params["search"] = search
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [
+            r.model_dump()
+            for r in hospitality_service.get_reservations(property_id=property_id, status_filter=status, search_query=search)
+        ]
+
+    def create_reservation(self, res_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/reservations"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=res_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import ReservationCreate
+        return hospitality_service.create_reservation(ReservationCreate(**res_data)).model_dump()
+
+    def check_in_guest(self, res_id: str, checkin_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/reservations/{res_id}/check-in"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=checkin_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import ReservationCheckInRequest
+        return hospitality_service.check_in_guest(res_id, ReservationCheckInRequest(**checkin_data)).model_dump()
+
+    def get_guest_folios(self, property_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/folios"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [f.model_dump() for f in hospitality_service.get_guest_folios(property_id=property_id, status_filter=status)]
+
+    def add_folio_charge(self, folio_id: str, charge_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/folios/{folio_id}/charges"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=charge_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import FolioLineCreate
+        return hospitality_service.add_folio_charge(folio_id, FolioLineCreate(**charge_data)).model_dump()
+
+    def check_out_and_settle_folio(self, folio_id: str, payment_method: str = "CREDIT_CARD") -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/folios/{folio_id}/settle"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json={"payment_method": payment_method})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return hospitality_service.check_out_and_settle_folio(folio_id, payment_method=payment_method).model_dump()
+
+    def get_dining_tables(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/dining/tables"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [t.model_dump() for t in hospitality_service.get_dining_tables(property_id=property_id)]
+
+    def get_dining_orders(self, property_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/dining/orders"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return [o.model_dump() for o in hospitality_service.get_dining_orders(property_id=property_id, status_filter=status)]
+
+    def create_dining_order(self, order_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/dining/orders"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=order_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import DiningOrderCreate
+        return hospitality_service.create_dining_order(DiningOrderCreate(**order_data)).model_dump()
+
+    def settle_dining_order(self, order_id: str, settle_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/dining/orders/{order_id}/settle"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=settle_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        from backend.app.schemas.hospitality import DiningOrderSettleRequest
+        return hospitality_service.settle_dining_order(order_id, DiningOrderSettleRequest(**settle_data)).model_dump()
+
+    def run_night_audit(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/night-audit"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return hospitality_service.run_night_audit(property_id=property_id)
+
+    def get_hospitality_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/hospitality/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.hospitality_service import hospitality_service
+        return hospitality_service.get_hospitality_metrics(property_id=property_id).model_dump()
+
 
 api_client = ApiClient()
 

@@ -428,6 +428,59 @@ class PartRequisitionStatus(str, Enum):
     RETURNED = "RETURNED"
 
 
+class RoomStatus(str, Enum):
+    AVAILABLE_CLEAN = "AVAILABLE_CLEAN"
+    DIRTY = "DIRTY"
+    INSPECTED = "INSPECTED"
+    OCCUPIED = "OCCUPIED"
+    MAINTENANCE = "MAINTENANCE"
+
+
+class ReservationStatus(str, Enum):
+    CONFIRMED = "CONFIRMED"
+    CHECKED_IN = "CHECKED_IN"
+    CHECKED_OUT = "CHECKED_OUT"
+    CANCELLED = "CANCELLED"
+    NO_SHOW = "NO_SHOW"
+
+
+class MealPlan(str, Enum):
+    EP = "EP"    # European Plan (Room Only)
+    CP = "CP"    # Continental Plan (Bed & Breakfast)
+    MAP = "MAP"  # Modified American Plan (Half Board: Breakfast + Dinner)
+    AP = "AP"    # American Plan (Full Board: All Meals)
+
+
+class FolioLineType(str, Enum):
+    ROOM_CHARGE = "ROOM_CHARGE"
+    FOOD_BEVERAGE = "FOOD_BEVERAGE"
+    SPA = "SPA"
+    LAUNDRY = "LAUNDRY"
+    MISC = "MISC"
+    PAYMENT = "PAYMENT"
+
+
+class FolioStatus(str, Enum):
+    OPEN = "OPEN"
+    SETTLED = "SETTLED"
+    TRANSFERRED = "TRANSFERRED"
+
+
+class DiningTableStatus(str, Enum):
+    VACANT = "VACANT"
+    OCCUPIED = "OCCUPIED"
+    RESERVED = "RESERVED"
+    BILLING = "BILLING"
+
+
+class KdsOrderStatus(str, Enum):
+    PENDING = "PENDING"
+    PREPARING = "PREPARING"
+    READY = "READY"
+    SERVED = "SERVED"
+    CANCELLED = "CANCELLED"
+
+
 
 
 

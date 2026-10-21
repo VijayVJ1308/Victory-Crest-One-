@@ -66,6 +66,16 @@ from backend.app.models.service import (
     FieldWorkOrder,
     WorkOrderPart
 )
+from backend.app.models.hospitality import (
+    RoomType,
+    Room,
+    Reservation,
+    GuestFolio,
+    FolioLine,
+    DiningTable,
+    DiningOrder,
+    DiningOrderItem
+)
 
 __all__ = [
     "Base",
@@ -120,7 +130,15 @@ __all__ = [
     "SLAPolicy",
     "SupportTicket",
     "FieldWorkOrder",
-    "WorkOrderPart"
+    "WorkOrderPart",
+    "RoomType",
+    "Room",
+    "Reservation",
+    "GuestFolio",
+    "FolioLine",
+    "DiningTable",
+    "DiningOrder",
+    "DiningOrderItem"
 ]
 
 

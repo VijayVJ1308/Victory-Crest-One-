@@ -125,7 +125,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🏨",
         "description": "Room inventory, rate plans, reservations, check-in/out, folios, and housekeeping.",
         "phase": 11,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "restaurant",
@@ -134,7 +134,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🍽️",
         "description": "Table management, KDS kitchen tickets, menu recipes, wastage, and folio billing.",
         "phase": 11,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "hr",

@@ -824,6 +824,95 @@ def calculate_first_contact_resolution_rate(total_tickets: int, fcr_count: int) 
     return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def calculate_reservation_totals(
+    room_rate_per_night: Number,
+    nights: int,
+    meal_plan_rate: Number = 0,
+    tax_rate_percent: Number = 12.0
+) -> dict:
+    """
+    Calculate reservation room charges, meal plan charges, tax, and grand total.
+    """
+    rate = to_decimal(room_rate_per_night)
+    n = max(1, int(nights))
+    meal_rate = to_decimal(meal_plan_rate)
+    tax_pct = to_decimal(tax_rate_percent)
+
+    room_charges = (rate * Decimal(str(n))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    meal_charges = (meal_rate * Decimal(str(n))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    subtotal = room_charges + meal_charges
+    tax_amount = (subtotal * (tax_pct / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    grand_total = subtotal + tax_amount
+
+    return {
+        "room_charges": room_charges,
+        "meal_charges": meal_charges,
+        "subtotal": subtotal,
+        "tax_rate_percent": tax_pct.quantize(Decimal("0.01")),
+        "tax_amount": tax_amount,
+        "grand_total": grand_total
+    }
+
+
+def calculate_folio_balance(lines: list) -> dict:
+    """
+    Calculate Guest Folio total charges, total payments, and remaining balance due.
+    """
+    tot_charges = Decimal("0.00")
+    tot_payments = Decimal("0.00")
+
+    for line in lines:
+        if isinstance(line, dict):
+            ltype = str(line.get("line_type", "")).upper()
+            amt = to_decimal(line.get("amount", 0))
+        else:
+            ltype = str(getattr(line, "line_type", "")).upper()
+            amt = to_decimal(getattr(line, "amount", 0))
+
+        if ltype == "PAYMENT":
+            tot_payments += amt
+        else:
+            tot_charges += amt
+
+    balance_due = (tot_charges - tot_payments).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return {
+        "total_charges": tot_charges.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_payments": tot_payments.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "balance_due": balance_due,
+        "is_settled": balance_due <= Decimal("0.00")
+    }
+
+
+def calculate_dining_bill_totals(
+    subtotal: Number,
+    service_charge_percent: Number = 5.0,
+    gst_percent: Number = 5.0,
+    discount_amount: Number = 0
+) -> dict:
+    """
+    Calculate restaurant food bill breakdown:
+    Subtotal - Discount + Service Charge (5%) + Restaurant GST (5%) = Grand Total
+    """
+    sub = to_decimal(subtotal)
+    disc = to_decimal(discount_amount)
+    sc_pct = to_decimal(service_charge_percent)
+    gst_pct = to_decimal(gst_percent)
+
+    net_sub = max(Decimal("0.00"), sub - disc)
+    sc_amt = (net_sub * (sc_pct / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    gst_amt = (net_sub * (gst_pct / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    grand_total = (net_sub + sc_amt + gst_amt).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "subtotal": sub.quantize(Decimal("0.01")),
+        "discount_amount": disc.quantize(Decimal("0.01")),
+        "net_subtotal": net_sub.quantize(Decimal("0.01")),
+        "service_charge": sc_amt,
+        "gst_amount": gst_amt,
+        "grand_total": grand_total
+    }
+
+
 
 
 
