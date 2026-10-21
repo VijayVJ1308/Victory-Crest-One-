@@ -33,6 +33,16 @@ from backend.app.schemas.marketing import (
     AttributionCreate, AttributionOut,
     MarketingMetricsOut
 )
+from backend.app.schemas.inventory import (
+    WarehouseCreate, WarehouseOut,
+    PurchaseOrderLineCreate, PurchaseOrderLineOut,
+    PurchaseOrderCreate, PurchaseOrderUpdate, PurchaseOrderOut, PurchaseOrderReceiveRequest,
+    GoodsReceiptNoteOut,
+    WarehouseStockOut, StockReplenishmentAlert,
+    StockTransferRequest, StockMovementCreate, StockMovementOut,
+    CycleCountCreate, CycleCountItemVariance, CycleCountReconcileRequest, CycleCountOut,
+    InventoryMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -100,7 +110,26 @@ __all__ = [
     "CampaignTemplateOut",
     "AttributionCreate",
     "AttributionOut",
-    "MarketingMetricsOut"
+    "MarketingMetricsOut",
+    "WarehouseCreate",
+    "WarehouseOut",
+    "PurchaseOrderLineCreate",
+    "PurchaseOrderLineOut",
+    "PurchaseOrderCreate",
+    "PurchaseOrderUpdate",
+    "PurchaseOrderOut",
+    "PurchaseOrderReceiveRequest",
+    "GoodsReceiptNoteOut",
+    "WarehouseStockOut",
+    "StockReplenishmentAlert",
+    "StockTransferRequest",
+    "StockMovementCreate",
+    "StockMovementOut",
+    "CycleCountCreate",
+    "CycleCountItemVariance",
+    "CycleCountReconcileRequest",
+    "CycleCountOut",
+    "InventoryMetricsOut"
 ]
 
 

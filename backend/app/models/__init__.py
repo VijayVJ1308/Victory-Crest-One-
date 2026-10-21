@@ -44,6 +44,15 @@ from backend.app.models.marketing import (
     CampaignTemplate,
     CampaignAttribution
 )
+from backend.app.models.inventory import (
+    Warehouse,
+    PurchaseOrder,
+    PurchaseOrderLine,
+    GoodsReceiptNote,
+    WarehouseStock,
+    StockMovement,
+    CycleCountSession
+)
 
 __all__ = [
     "Base",
@@ -82,8 +91,16 @@ __all__ = [
     "AudienceSegment",
     "CustomerJourney",
     "CampaignTemplate",
-    "CampaignAttribution"
+    "CampaignAttribution",
+    "Warehouse",
+    "PurchaseOrder",
+    "PurchaseOrderLine",
+    "GoodsReceiptNote",
+    "WarehouseStock",
+    "StockMovement",
+    "CycleCountSession"
 ]
+
 
 
 

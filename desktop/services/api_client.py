@@ -947,6 +947,207 @@ class ApiClient:
         from backend.app.services.marketing_service import marketing_service
         return marketing_service.get_marketing_metrics().model_dump()
 
+    # ---------------------------------------------------------
+    # Supply Chain, ERP & Inventory Management
+    # ---------------------------------------------------------
+    def get_warehouses(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/warehouses"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [w.model_dump() for w in inventory_service.list_warehouses(property_id=property_id)]
+
+    def create_warehouse(self, warehouse_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/warehouses"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=warehouse_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import WarehouseCreate
+        return inventory_service.create_warehouse(WarehouseCreate(**warehouse_data)).model_dump()
+
+    def get_stock(
+        self,
+        warehouse_id: Optional[str] = None,
+        category: Optional[str] = None,
+        stock_status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/stock"
+        params = {}
+        if warehouse_id:
+            params["warehouse_id"] = warehouse_id
+        if category:
+            params["category"] = category
+        if stock_status:
+            params["stock_status"] = stock_status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [s.model_dump() for s in inventory_service.list_stock(warehouse_id=warehouse_id, category=category, stock_status=stock_status)]
+
+    def get_replenishment_alerts(self, warehouse_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/alerts/replenishment"
+        params = {"warehouse_id": warehouse_id} if warehouse_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [a.model_dump() for a in inventory_service.list_replenishment_alerts(warehouse_id=warehouse_id)]
+
+    def get_purchase_orders(
+        self,
+        supplier_id: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/purchase-orders"
+        params = {}
+        if supplier_id:
+            params["supplier_id"] = supplier_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [po.model_dump() for po in inventory_service.list_purchase_orders(supplier_id=supplier_id, status_filter=status)]
+
+    def create_purchase_order(self, po_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/purchase-orders"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=po_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import PurchaseOrderCreate
+        return inventory_service.create_purchase_order(PurchaseOrderCreate(**po_data)).model_dump()
+
+    def get_purchase_order(self, po_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/purchase-orders/{po_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return inventory_service.get_purchase_order(po_id).model_dump()
+
+    def receive_purchase_order(self, po_id: str, receipt_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/purchase-orders/{po_id}/receive"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=receipt_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import PurchaseOrderReceiveRequest
+        return inventory_service.receive_purchase_order(po_id, PurchaseOrderReceiveRequest(**receipt_data)).model_dump()
+
+    def transfer_stock(self, transfer_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/transfers"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=transfer_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import StockTransferRequest
+        return inventory_service.transfer_stock(StockTransferRequest(**transfer_data)).model_dump()
+
+    def get_stock_movements(self, limit: int = 50) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/movements"
+        params = {"limit": limit}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [m.model_dump() for m in inventory_service.list_stock_movements(limit=limit)]
+
+    def get_cycle_counts(self) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/cycle-counts"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return [c.model_dump() for c in inventory_service.list_cycle_counts()]
+
+    def create_cycle_count(self, count_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/cycle-counts"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=count_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import CycleCountCreate
+        return inventory_service.create_cycle_count(CycleCountCreate(**count_data)).model_dump()
+
+    def reconcile_cycle_count(self, session_id: str, reconcile_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/cycle-counts/{session_id}/reconcile"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=reconcile_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        from backend.app.schemas.inventory import CycleCountReconcileRequest
+        return inventory_service.reconcile_cycle_count(session_id, CycleCountReconcileRequest(**reconcile_data)).model_dump()
+
+    def get_inventory_metrics(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/metrics"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return inventory_service.get_inventory_metrics().model_dump()
+
 
 api_client = ApiClient()
 

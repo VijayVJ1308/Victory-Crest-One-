@@ -9,6 +9,9 @@ from desktop.ui.views.settings_view import SettingsView
 from desktop.ui.views.documents_view import DocumentsView
 from desktop.ui.views.finance_view import FinanceView
 from desktop.ui.views.crm_view import SalesCrmView
+from desktop.ui.views.pos_view import PosCommerceView
+from desktop.ui.views.marketing_view import MarketingView
+from desktop.ui.views.inventory_view import InventoryView
 
 __all__ = [
     "DashboardView",
@@ -18,6 +21,9 @@ __all__ = [
     "SettingsView",
     "DocumentsView",
     "FinanceView",
-    "SalesCrmView"
+    "SalesCrmView",
+    "PosCommerceView",
+    "MarketingView",
+    "InventoryView"
 ]
 

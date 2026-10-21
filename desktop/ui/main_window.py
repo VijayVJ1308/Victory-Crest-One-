@@ -26,6 +26,7 @@ from desktop.ui.views.finance_view import FinanceView
 from desktop.ui.views.crm_view import SalesCrmView
 from desktop.ui.views.pos_view import PosCommerceView
 from desktop.ui.views.marketing_view import MarketingView
+from desktop.ui.views.inventory_view import InventoryView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -83,6 +84,7 @@ class MainWindow(QMainWindow):
         self.crm_view = SalesCrmView()
         self.pos_view = PosCommerceView()
         self.marketing_view = MarketingView()
+        self.inventory_view = InventoryView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -94,6 +96,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.crm_view)                # index 7: sales & crm
         self.view_stack.addWidget(self.pos_view)                # index 8: pos & commerce
         self.view_stack.addWidget(self.marketing_view)          # index 9: marketing
+        self.view_stack.addWidget(self.inventory_view)          # index 10: inventory & erp
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -150,8 +153,8 @@ class MainWindow(QMainWindow):
             ("OPERATIONS & ERP", [
                 ("finance", "💰  Finance & Banking", "active"),
                 ("accounting", "📑  General Accounting", "active"),
-                ("erp", "📦  Supply Chain & ERP", "planned"),
-                ("inventory", "🏭  Inventory & Warehouse", "planned"),
+                ("erp", "📦  Supply Chain & ERP", "active"),
+                ("inventory", "🏭  Inventory & Warehouse", "active"),
                 ("service", "🛠️  Customer & Field Service", "planned"),
                 ("projects", "📋  Project Management", "planned"),
             ]),
@@ -295,6 +298,8 @@ class MainWindow(QMainWindow):
             self.pos_view.refresh_data()
         if hasattr(self, "marketing_view"):
             self.marketing_view.refresh_data()
+        if hasattr(self, "inventory_view"):
+            self.inventory_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -411,6 +416,14 @@ class MainWindow(QMainWindow):
         elif key == "marketing":
             self.marketing_view.refresh_data()
             self.view_stack.setCurrentIndex(9)
+        elif key == "inventory":
+            self.inventory_view.refresh_data()
+            self.inventory_view.tabs.setCurrentIndex(0)  # Warehouse Stock Catalog
+            self.view_stack.setCurrentIndex(10)
+        elif key == "erp":
+            self.inventory_view.refresh_data()
+            self.inventory_view.tabs.setCurrentIndex(1)  # Purchase Orders & Receiving
+            self.view_stack.setCurrentIndex(10)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

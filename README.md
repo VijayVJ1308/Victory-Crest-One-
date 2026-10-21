@@ -181,30 +181,36 @@ Victory Crest ONE enforces strict tenant isolation:
 
 ---
 
-## 🛡️ Phase 1 Foundation Status
+## 🛡️ Implementation Roadmap & Milestones
 
-- [x] Workspace inspection and Git repository initialization (`main` branch)
-- [x] Dependency configuration (`requirements.txt`, `pyproject.toml`)
-- [x] Environment configuration (`.env.example`)
-- [x] Structured logging with sensitive data redaction
-- [x] FastAPI central backend application with lifespan management
-- [x] Comprehensive `/health` endpoint with database connection latency telemetry
-- [x] Database configuration supporting PostgreSQL connection pool and SQLite local storage
-- [x] Clear connection diagnostics with troubleshooting instructions
-- [x] PySide6 enterprise desktop application with dark design system
-- [x] Persistent sidebar with categorized navigation across 18+ business modules
-- [x] Top toolbar with organisation selector, property selector, and global search
-- [x] Executive dashboard with Decimal-safe KPI calculations (Occupancy, ADR, RevPAR, Margin)
-- [x] Complete module catalog view with domain filtering and search
-- [x] Dedicated planned module roadmap views (transparently labelled, not fake screens)
-- [x] Interactive System Diagnostics view with live check button
-- [x] 23 automated tests (unit, integration, and UI shell) passing cleanly
-- [x] Architecture, setup, and testing documentation
+- [x] **Phase 1: Foundation Deliverable & Desktop Shell** (FastAPI lifespan, PySide6 Shell, multi-tenant hierarchy, SQLite offline engine, 23 tests)
+- [x] **Phase 2: Identity, RBAC & Permissions Engine** (Argon2 hashing, JWT sessions, role permission matrix, separation of duties, immutable audit trail)
+- [x] **Phase 3: Master Data, Document Vault & Notifications** (Customers, Suppliers, Products catalog, Deduplication engine, SHA-256 Document Vault, Alert broadcasting)
+- [x] **Phase 4: Finance & General Accounting Engine** (Full Chart of Accounts, balanced double-entry GL, Customer Invoices / AR, Supplier Bills / AP, Trial Balance, P&L, Balance Sheet)
+- [x] **Phase 5: Sales CRM & Revenue Pipeline** (Lead conversion, pipeline deal stages, win rate analytics, weighted pipeline forecasting, sales quotes)
+- [x] **Phase 6: Commerce & Point of Sale (POS)** (Cash register shifts, barcode lookup, hold/recall orders, split tenders, thermal receipts, automated GL journal posting)
+- [x] **Phase 7: Marketing Automation & Growth** (Multi-channel campaigns, audience segmentation, customer journeys, message templates, conversion attribution & ROAS)
+- [x] **Phase 8: Supply Chain, ERP & Warehouse Inventory** (Multi-warehouse stock balances, procurement Purchase Orders, Goods Receipt Notes with automated GL/AP posting, AVCO weighted average cost valuation, replenishment alerts, inter-warehouse transfers, and physical stocktaking cycle counts)
 
 ---
 
-## 📅 Next Phase: Phase 2 — Identity, RBAC & Permissions Engine
-- Argon2 password hashing and secure token sessions
-- Granular permission matrix across roles (System Admin, General Manager, Accountant, etc.)
-- Organisation and property-level authorization middleware
-- Immutable audit log tracking
+## 🧪 Comprehensive Automated Test Suite
+
+Run the full automated test suite (unit, integration, security, and UI shell tests):
+
+```bash
+./.venv/bin/pytest tests/ -v
+```
+
+**124 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, and inventory/AVCO calculations
+- **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, and Inventory
+- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack
+
+---
+
+## 📅 Next Phase: Phase 9 — Manufacturing & Bill of Materials (BOM) / Hospitality PMS & Guest Folios
+- Multi-level Bill of Materials (BOM) and production work orders
+- Finished goods conversion and raw materials auto-consumption
+- Hospitality room rack, reservation engine, guest check-in/check-out, and folio night audits

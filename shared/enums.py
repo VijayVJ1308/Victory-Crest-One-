@@ -273,5 +273,53 @@ class AttributionModel(str, Enum):
     TIME_DECAY = "TIME_DECAY"
 
 
+class PurchaseOrderStatus(str, Enum):
+    DRAFT = "DRAFT"
+    ISSUED = "ISSUED"
+    PARTIALLY_RECEIVED = "PARTIALLY_RECEIVED"
+    RECEIVED = "RECEIVED"
+    CLOSED = "CLOSED"
+    CANCELLED = "CANCELLED"
+
+
+class RequisitionStatus(str, Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    CONVERTED = "CONVERTED"
+
+
+class MovementType(str, Enum):
+    RECEIPT = "RECEIPT"
+    TRANSFER = "TRANSFER"
+    CONSUMPTION = "CONSUMPTION"
+    ADJUSTMENT = "ADJUSTMENT"
+    SCRAP = "SCRAP"
+
+
+class StockStatus(str, Enum):
+    IN_STOCK = "IN_STOCK"
+    LOW_STOCK = "LOW_STOCK"
+    OUT_OF_STOCK = "OUT_OF_STOCK"
+    OVERSTOCKED = "OVERSTOCKED"
+
+
+class CycleCountStatus(str, Enum):
+    OPEN = "OPEN"
+    IN_PROGRESS = "IN_PROGRESS"
+    RECONCILED = "RECONCILED"
+    CANCELLED = "CANCELLED"
+
+
+class WarehouseType(str, Enum):
+    CENTRAL = "CENTRAL"
+    FNB_COMMISSARY = "FNB_COMMISSARY"
+    COLD_STORAGE = "COLD_STORAGE"
+    RETAIL_STORE = "RETAIL_STORE"
+    MAINTENANCE = "MAINTENANCE"
+
+
+
 
 

@@ -89,7 +89,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📦",
         "description": "Procurement, purchase orders, vendor evaluation, and replenishment planning.",
         "phase": 8,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "inventory",
@@ -98,7 +98,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🏭",
         "description": "Multi-warehouse stock movements, lot/batch tracking, valuation, and stocktaking.",
         "phase": 8,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "manufacturing",

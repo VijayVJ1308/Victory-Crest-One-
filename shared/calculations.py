@@ -423,5 +423,128 @@ def calculate_campaign_kpis(
     }
 
 
+def calculate_reorder_point(
+    lead_time_days: Number,
+    daily_usage: Number,
+    safety_stock: Number = Decimal("0.00")
+) -> Decimal:
+    """
+    Calculate inventory Reorder Point (ROP) = (Lead Time Days * Daily Usage) + Safety Stock.
+    """
+    lt = to_decimal(lead_time_days)
+    usage = to_decimal(daily_usage)
+    safety = to_decimal(safety_stock)
+    rop = (lt * usage) + safety
+    return rop.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_inventory_valuation(items: list) -> dict:
+    """
+    Calculate aggregate inventory valuation across stock items:
+    Total Value = Sum(quantity_on_hand * unit_cost)
+    """
+    total_units = Decimal("0.00")
+    total_val = Decimal("0.00")
+
+    for item in items:
+        if isinstance(item, dict):
+            qty = to_decimal(item.get("quantity_on_hand", item.get("quantity", 0)))
+            cost = to_decimal(item.get("unit_cost", item.get("cost_price", 0)))
+        else:
+            qty = to_decimal(getattr(item, "quantity_on_hand", getattr(item, "quantity", 0)))
+            cost = to_decimal(getattr(item, "unit_cost", getattr(item, "cost_price", 0)))
+        total_units += qty
+        total_val += (qty * cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "total_skus": len(items),
+        "total_units": total_units.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_valuation": total_val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+def calculate_stock_variance(
+    book_quantity: Number,
+    counted_quantity: Number,
+    unit_cost: Number
+) -> dict:
+    """
+    Calculate stocktaking cycle count discrepancy:
+    Variance Qty = Counted - Book (positive = surplus, negative = shrinkage/loss)
+    Variance Value = Variance Qty * Unit Cost
+    """
+    book = to_decimal(book_quantity)
+    counted = to_decimal(counted_quantity)
+    cost = to_decimal(unit_cost)
+
+    var_qty = (counted - book).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    var_val = (var_qty * cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "book_quantity": book,
+        "counted_quantity": counted,
+        "unit_cost": cost,
+        "variance_quantity": var_qty,
+        "variance_value": var_val,
+        "is_discrepant": var_qty != Decimal("0.00")
+    }
+
+
+def calculate_weighted_average_cost(
+    old_qty: Number,
+    old_cost: Number,
+    new_qty: Number,
+    new_price: Number
+) -> Decimal:
+    """
+    Calculate Weighted Average Cost (AVCO) when new stock is received:
+    New Avg Cost = (Old Value + New Purchase Value) / Total Quantity.
+    """
+    o_qty = to_decimal(old_qty)
+    o_cost = to_decimal(old_cost)
+    n_qty = to_decimal(new_qty)
+    n_price = to_decimal(new_price)
+
+    tot_qty = o_qty + n_qty
+    if tot_qty <= Decimal("0.00"):
+        return n_price.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    tot_value = (o_qty * o_cost) + (n_qty * n_price)
+    avg_cost = tot_value / tot_qty
+    return avg_cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_po_totals(lines: list, tax_rate_percent: Number = Decimal("0.00")) -> dict:
+    """
+    Calculate itemized Purchase Order totals: Subtotal, Tax Amount, and Grand Total.
+    """
+    subtotal = Decimal("0.00")
+    for line in lines:
+        if isinstance(line, dict):
+            qty = to_decimal(line.get("quantity_ordered", line.get("quantity", 1)))
+            price = to_decimal(line.get("unit_price", 0))
+            raw_amt = line.get("total_amount") or line.get("amount")
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * price)
+        else:
+            qty = to_decimal(getattr(line, "quantity_ordered", getattr(line, "quantity", 1)))
+            price = to_decimal(getattr(line, "unit_price", 0))
+            raw_amt = getattr(line, "total_amount", None) or getattr(line, "amount", None)
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * price)
+        subtotal += line_amt
+
+    subtotal = subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    tax_pct = to_decimal(tax_rate_percent)
+    tax_amt = (subtotal * (tax_pct / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    grand_total = subtotal + tax_amt
+
+    return {
+        "subtotal": subtotal,
+        "tax_rate_percent": tax_pct,
+        "tax_amount": tax_amt,
+        "total_amount": grand_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+
 
 
