@@ -609,7 +609,210 @@ class ApiClient:
         from backend.app.services.crm_service import crm_service
         return crm_service.get_activities(organization_id)
 
+    # ---------------------------------------------------------
+    # POS & Commerce Client Methods
+    # ---------------------------------------------------------
+    def get_pos_terminals(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/terminals"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return [t.model_dump() for t in pos_service.list_terminals(property_id)]
+
+    def get_active_pos_session(self, terminal_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/sessions/active"
+        params = {"terminal_id": terminal_id} if terminal_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        sess = pos_service.get_active_session(terminal_id)
+        return sess.model_dump() if sess else None
+
+    def open_pos_session(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/sessions/open"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=session_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        from backend.app.schemas.pos import PosSessionOpenRequest
+        sess = pos_service.open_session(PosSessionOpenRequest(**session_data))
+        return sess.model_dump()
+
+    def close_pos_session(self, session_id: str, close_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/sessions/{session_id}/close"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=close_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        from backend.app.schemas.pos import PosSessionCloseRequest
+        sess = pos_service.close_session(session_id, PosSessionCloseRequest(**close_data))
+        return sess.model_dump()
+
+    def get_pos_products(
+        self,
+        query: Optional[str] = None,
+        category: Optional[str] = None,
+        barcode: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/products"
+        params = {}
+        if query:
+            params["query"] = query
+        if category:
+            params["category"] = category
+        if barcode:
+            params["barcode"] = barcode
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.list_products(query=query, category=category, barcode=barcode)
+
+    def get_pos_orders(
+        self,
+        session_id: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders"
+        params = {"limit": limit}
+        if session_id:
+            params["session_id"] = session_id
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return [o.model_dump() for o in pos_service.list_orders(session_id=session_id, status_filter=status, limit=limit)]
+
+    def get_pos_order(self, order_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.get_order(order_id).model_dump()
+
+    def create_pos_order(self, order_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=order_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        from backend.app.schemas.pos import PosOrderCreate
+        return pos_service.create_order(PosOrderCreate(**order_data)).model_dump()
+
+    def hold_pos_order(self, order_id: str, reason: str = "Customer request") -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}/hold"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json={"reason": reason})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.hold_order(order_id, reason=reason).model_dump()
+
+    def recall_pos_order(self, order_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}/recall"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.recall_order(order_id).model_dump()
+
+    def void_pos_order(self, order_id: str, reason: str = "Customer cancelled") -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}/void"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, params={"reason": reason})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.void_order(order_id, reason=reason).model_dump()
+
+    def tender_pos_order(self, order_id: str, tender_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}/tender"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=tender_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        from backend.app.schemas.pos import PosOrderTenderRequest
+        return pos_service.tender_order(order_id, PosOrderTenderRequest(**tender_data)).model_dump()
+
+    def get_pos_receipt(self, order_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/orders/{order_id}/receipt"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.get_receipt(order_id).model_dump()
+
+    def get_pos_metrics(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/pos/metrics"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.pos_service import pos_service
+        return pos_service.get_pos_metrics().model_dump()
+
 
 api_client = ApiClient()
+
 
 

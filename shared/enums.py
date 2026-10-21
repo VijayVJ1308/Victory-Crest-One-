@@ -208,3 +208,32 @@ class ActivityType(str, Enum):
     TASK = "task"
 
 
+class PosSessionStatus(str, Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+    SUSPENDED = "SUSPENDED"
+
+
+class PosOrderStatus(str, Enum):
+    OPEN = "OPEN"
+    HELD = "HELD"
+    COMPLETED = "COMPLETED"
+    VOIDED = "VOIDED"
+    REFUNDED = "REFUNDED"
+
+
+class TenderType(str, Enum):
+    CASH = "CASH"
+    CREDIT_CARD = "CREDIT_CARD"
+    UPI_QR = "UPI_QR"
+    ROOM_CHARGE = "ROOM_CHARGE"
+    GIFT_CARD = "GIFT_CARD"
+
+
+class PosTerminalStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    MAINTENANCE = "MAINTENANCE"
+
+
+

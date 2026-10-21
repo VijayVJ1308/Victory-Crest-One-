@@ -51,7 +51,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🛒",
         "description": "Multi-channel catalog, online storefront, inventory reservation, and cart.",
         "phase": 6,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "pos",
@@ -60,8 +60,9 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "💳",
         "description": "Multi-register cashier terminals, barcode scanning, drawer reconciliation, and receipts.",
         "phase": 6,
-        "status": "planned"
+        "status": "active"
     },
+
     {
         "id": "finance",
         "name": "Finance & Banking",

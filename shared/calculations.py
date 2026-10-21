@@ -239,3 +239,110 @@ def calculate_win_rate(won_count: int, lost_count: int) -> Decimal:
     return rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def calculate_pos_change(tendered_amount: Number, total_amount: Number) -> Decimal:
+    """
+    Calculate change to return to customer.
+    Returns 0.00 if tendered is less than total or negative.
+    """
+    tendered = to_decimal(tendered_amount)
+    total = to_decimal(total_amount)
+    if tendered < total or tendered <= Decimal("0"):
+        return Decimal("0.00")
+    change = (tendered - total).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return change
+
+
+def calculate_drawer_variance(counted_cash: Number, expected_cash: Number) -> Decimal:
+    """
+    Calculate cash drawer variance = counted_cash - expected_cash.
+    Positive value indicates overage; negative indicates shortage.
+    """
+    counted = to_decimal(counted_cash)
+    expected = to_decimal(expected_cash)
+    return (counted - expected).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def calculate_pos_order_totals(
+    lines: list,
+    discount_percent: Number = Decimal("0.00"),
+    tax_rate_percent: Number = Decimal("0.00")
+) -> dict:
+    """
+    Calculate itemized POS order totals:
+    - Gross Subtotal
+    - Discount Amount
+    - Net Taxable Amount
+    - Tax Amount
+    - Grand Total
+    """
+    gross_subtotal = Decimal("0.00")
+    for line in lines:
+        if isinstance(line, dict):
+            qty = to_decimal(line.get("quantity", 1))
+            unit_price = to_decimal(line.get("unit_price", 0))
+            raw_amt = line.get("total_amount") or line.get("amount")
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * unit_price)
+        else:
+            qty = to_decimal(getattr(line, "quantity", 1))
+            unit_price = to_decimal(getattr(line, "unit_price", 0))
+            raw_amt = getattr(line, "total_amount", None) or getattr(line, "amount", None)
+            line_amt = to_decimal(raw_amt) if raw_amt is not None else (qty * unit_price)
+        gross_subtotal += line_amt
+
+    gross_subtotal = gross_subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    disc_pct = to_decimal(discount_percent)
+    if disc_pct < Decimal("0"):
+        disc_pct = Decimal("0.00")
+    elif disc_pct > Decimal("100"):
+        disc_pct = Decimal("100.00")
+
+    discount_amount = (gross_subtotal * (disc_pct / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    taxable_amount = gross_subtotal - discount_amount
+
+    tax_pct = to_decimal(tax_rate_percent)
+    if tax_pct < Decimal("0"):
+        tax_pct = Decimal("0.00")
+
+    tax_amount = (taxable_amount * (tax_pct / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_amount = taxable_amount + tax_amount
+
+    return {
+        "subtotal": gross_subtotal,
+        "discount_percent": disc_pct,
+        "discount_amount": discount_amount,
+        "taxable_amount": taxable_amount,
+        "tax_rate_percent": tax_pct,
+        "tax_amount": tax_amount,
+        "total_amount": total_amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    }
+
+
+def calculate_split_tenders(tender_list: list, total_amount: Number) -> tuple[Decimal, Decimal, bool]:
+    """
+    Calculate aggregate payments across multiple tenders.
+    Returns: (total_tendered, remaining_balance, is_fully_paid)
+    remaining_balance is 0.00 if fully paid (or overpaid).
+    """
+    total = to_decimal(total_amount)
+    tendered = Decimal("0.00")
+    for t in tender_list:
+        if isinstance(t, dict):
+            amt = to_decimal(t.get("amount", 0))
+        else:
+            amt = to_decimal(getattr(t, "amount", 0))
+        tendered += amt
+
+    tendered = tendered.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    diff = total - tendered
+    if diff <= Decimal("0.00"):
+        remaining = Decimal("0.00")
+        is_paid = True
+    else:
+        remaining = diff.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        is_paid = False
+
+    return tendered, remaining, is_paid
+
+
+

@@ -30,6 +30,13 @@ from backend.app.models.crm import (
     QuoteLine,
     SalesActivity
 )
+from backend.app.models.pos import (
+    PosTerminal,
+    PosSession,
+    PosOrder,
+    PosOrderLine,
+    PosPayment
+)
 
 __all__ = [
     "Base",
@@ -58,7 +65,13 @@ __all__ = [
     "Deal",
     "Quote",
     "QuoteLine",
-    "SalesActivity"
+    "SalesActivity",
+    "PosTerminal",
+    "PosSession",
+    "PosOrder",
+    "PosOrderLine",
+    "PosPayment"
 ]
+
 
 

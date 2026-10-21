@@ -17,6 +17,14 @@ from backend.app.schemas.crm import (
     SalesActivityCreate, SalesActivityOut,
     SalesPipelineMetricsResponse
 )
+from backend.app.schemas.pos import (
+    PosTerminalCreate, PosTerminalOut,
+    PosSessionOpenRequest, PosSessionCloseRequest, PosSessionOut,
+    PosOrderLineCreate, PosOrderLineOut,
+    PosPaymentCreate, PosPaymentOut,
+    PosOrderCreate, PosOrderHoldRequest, PosOrderTenderRequest, PosOrderOut,
+    PosReceiptItem, PosReceiptOut, PosMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -54,7 +62,24 @@ __all__ = [
     "QuoteConvertInvoiceResponse",
     "SalesActivityCreate",
     "SalesActivityOut",
-    "SalesPipelineMetricsResponse"
+    "SalesPipelineMetricsResponse",
+    "PosTerminalCreate",
+    "PosTerminalOut",
+    "PosSessionOpenRequest",
+    "PosSessionCloseRequest",
+    "PosSessionOut",
+    "PosOrderLineCreate",
+    "PosOrderLineOut",
+    "PosPaymentCreate",
+    "PosPaymentOut",
+    "PosOrderCreate",
+    "PosOrderHoldRequest",
+    "PosOrderTenderRequest",
+    "PosOrderOut",
+    "PosReceiptItem",
+    "PosReceiptOut",
+    "PosMetricsOut"
 ]
+
 
 
