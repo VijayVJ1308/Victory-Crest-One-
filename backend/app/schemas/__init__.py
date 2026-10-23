@@ -75,6 +75,15 @@ from backend.app.schemas.manufacturing import (
     ProductionOrderCreate, ProductionOrderStartRequest, ProductionOrderCompleteRequest, ProductionOrderOut,
     ManufacturingMetricsOut
 )
+from backend.app.schemas.project import (
+    MilestoneBase, MilestoneCreate, MilestoneUpdate, MilestoneOut,
+    TaskBase, TaskCreate, TaskUpdate, TaskOut,
+    TimesheetBase, TimesheetCreate, TimesheetOut,
+    ExpenseBase, ExpenseCreate, ExpenseOut,
+    ProjectBase, ProjectCreate, ProjectUpdate, ProjectOut,
+    MilestoneInvoiceRequest, MilestoneInvoiceResponse,
+    ProjectMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -227,7 +236,28 @@ __all__ = [
     "ProductionOrderStartRequest",
     "ProductionOrderCompleteRequest",
     "ProductionOrderOut",
-    "ManufacturingMetricsOut"
+    "ManufacturingMetricsOut",
+    "MilestoneBase",
+    "MilestoneCreate",
+    "MilestoneUpdate",
+    "MilestoneOut",
+    "TaskBase",
+    "TaskCreate",
+    "TaskUpdate",
+    "TaskOut",
+    "TimesheetBase",
+    "TimesheetCreate",
+    "TimesheetOut",
+    "ExpenseBase",
+    "ExpenseCreate",
+    "ExpenseOut",
+    "ProjectBase",
+    "ProjectCreate",
+    "ProjectUpdate",
+    "ProjectOut",
+    "MilestoneInvoiceRequest",
+    "MilestoneInvoiceResponse",
+    "ProjectMetricsOut"
 ]
 
 

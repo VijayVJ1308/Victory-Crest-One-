@@ -521,6 +521,66 @@ class QualityStatus(str, Enum):
     CONDITIONAL = "CONDITIONAL"
 
 
+# ============================================================================
+# Phase 13: Project Management & Professional Services (PSA)
+# ============================================================================
+
+class ProjectStatus(str, Enum):
+    PLANNING = "PLANNING"
+    ACTIVE = "ACTIVE"
+    ON_HOLD = "ON_HOLD"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class ProjectPriority(str, Enum):
+    LOW = "LOW"
+    NORMAL = "NORMAL"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+
+
+class MilestoneStatus(str, Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    ACHIEVED = "ACHIEVED"
+    INVOICED = "INVOICED"
+    CANCELLED = "CANCELLED"
+
+
+class TaskStatus(str, Enum):
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    IN_REVIEW = "IN_REVIEW"
+    DONE = "DONE"
+    BLOCKED = "BLOCKED"
+
+
+class BillingType(str, Enum):
+    FIXED_PRICE = "FIXED_PRICE"
+    TIME_AND_MATERIALS = "TIME_AND_MATERIALS"
+    MILESTONE_BASED = "MILESTONE_BASED"
+    NON_BILLABLE = "NON_BILLABLE"
+
+
+class TimesheetStatus(str, Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    INVOICED = "INVOICED"
+
+
+class ProjectExpenseCategory(str, Enum):
+    TRAVEL = "TRAVEL"
+    SOFTWARE_LICENSE = "SOFTWARE_LICENSE"
+    EQUIPMENT = "EQUIPMENT"
+    SUBCONTRACTOR = "SUBCONTRACTOR"
+    MATERIALS = "MATERIALS"
+    MISC = "MISC"
+
+
+
 
 
 

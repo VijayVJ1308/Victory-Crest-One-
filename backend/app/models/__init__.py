@@ -85,6 +85,13 @@ from backend.app.models.manufacturing import (
     ProductionMaterialUsage,
     QualityInspection
 )
+from backend.app.models.project import (
+    Project,
+    ProjectMilestone,
+    ProjectTask,
+    ProjectTimesheet,
+    ProjectExpense
+)
 
 __all__ = [
     "Base",
@@ -154,7 +161,12 @@ __all__ = [
     "BomOperation",
     "ProductionOrder",
     "ProductionMaterialUsage",
-    "QualityInspection"
+    "QualityInspection",
+    "Project",
+    "ProjectMilestone",
+    "ProjectTask",
+    "ProjectTimesheet",
+    "ProjectExpense"
 ]
 
 

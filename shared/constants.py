@@ -161,7 +161,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📋",
         "description": "Portfolios, milestones, task dependencies, resource allocation, and billable time.",
         "phase": 13,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "bi",

@@ -1108,6 +1108,195 @@ def calculate_manufacturing_kpis(
     }
 
 
+# ============================================================================
+# Phase 13: Project Management & Professional Services (PSA)
+# ============================================================================
+
+def calculate_project_budget_variance(
+    budget_amount: Number,
+    actual_cost: Number
+) -> dict:
+    """
+    Calculate project budget variance:
+    variance = budget_amount - actual_cost
+    variance_pct = (variance / budget_amount) * 100
+    is_over_budget = actual_cost > budget_amount
+    """
+    budget = max(Decimal("0.00"), to_decimal(budget_amount))
+    actual = max(Decimal("0.00"), to_decimal(actual_cost))
+    variance = (budget - actual).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if budget > Decimal("0.00"):
+        var_pct = ((variance / budget) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        var_pct = Decimal("0.00")
+
+    return {
+        "budget_amount": budget.quantize(Decimal("0.01")),
+        "actual_cost": actual.quantize(Decimal("0.01")),
+        "variance": variance,
+        "variance_percent": var_pct,
+        "is_over_budget": actual > budget
+    }
+
+
+def calculate_project_burn_rate(
+    total_cost: Number,
+    elapsed_days: Number,
+    total_project_days: Number = 0
+) -> dict:
+    """
+    Calculate project burn rate:
+    daily_burn_rate = total_cost / max(1, elapsed_days)
+    projected_total = daily_burn_rate * total_project_days
+    """
+    cost = max(Decimal("0.00"), to_decimal(total_cost))
+    elapsed = max(Decimal("1.00"), to_decimal(elapsed_days))
+    total_days = max(Decimal("0.00"), to_decimal(total_project_days))
+
+    daily_burn = (cost / elapsed).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    if total_days > Decimal("0.00"):
+        projected = (daily_burn * total_days).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        projected = cost
+
+    return {
+        "total_cost": cost.quantize(Decimal("0.01")),
+        "elapsed_days": elapsed,
+        "daily_burn_rate": daily_burn,
+        "total_project_days": total_days,
+        "projected_total_cost": projected
+    }
+
+
+def calculate_timesheet_totals(timesheets: list) -> dict:
+    """
+    Calculate timesheet metrics:
+    - total_hours, billable_hours, non_billable_hours
+    - billable_amount (hours * hourly_billing_rate)
+    - labor_cost (hours * hourly_cost_rate)
+    - utilization_rate = (billable_hours / total_hours) * 100
+    """
+    tot_hours = Decimal("0.00")
+    bill_hours = Decimal("0.00")
+    tot_billable_amt = Decimal("0.00")
+    tot_cost_amt = Decimal("0.00")
+
+    for t in timesheets:
+        if isinstance(t, dict):
+            hrs = to_decimal(t.get("hours", 0))
+            is_bill = bool(t.get("is_billable", True))
+            bill_rate = to_decimal(t.get("hourly_billing_rate", 0))
+            cost_rate = to_decimal(t.get("hourly_cost_rate", 0))
+        else:
+            hrs = to_decimal(getattr(t, "hours", 0))
+            is_bill = bool(getattr(t, "is_billable", True))
+            bill_rate = to_decimal(getattr(t, "hourly_billing_rate", 0))
+            cost_rate = to_decimal(getattr(t, "hourly_cost_rate", 0))
+
+        tot_hours += hrs
+        tot_cost_amt += hrs * cost_rate
+        if is_bill:
+            bill_hours += hrs
+            tot_billable_amt += hrs * bill_rate
+
+    non_bill_hours = tot_hours - bill_hours
+    if tot_hours > Decimal("0.00"):
+        util_rate = ((bill_hours / tot_hours) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        util_rate = Decimal("0.00")
+
+    return {
+        "total_hours": tot_hours.quantize(Decimal("0.01")),
+        "billable_hours": bill_hours.quantize(Decimal("0.01")),
+        "non_billable_hours": non_bill_hours.quantize(Decimal("0.01")),
+        "billable_amount": tot_billable_amt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "labor_cost": tot_cost_amt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "utilization_rate": util_rate
+    }
+
+
+def calculate_milestone_invoice(
+    milestone_amount: Number,
+    tax_percent: Number = 18.0
+) -> dict:
+    """
+    Calculate customer invoice amounts for achieved project milestone:
+    subtotal = milestone_amount
+    tax_amount = subtotal * (tax_percent / 100)
+    grand_total = subtotal + tax_amount
+    """
+    sub = max(Decimal("0.00"), to_decimal(milestone_amount))
+    t_pct = max(Decimal("0.00"), to_decimal(tax_percent))
+
+    tax_amt = (sub * (t_pct / Decimal("100.00"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    grand_total = (sub + tax_amt).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "subtotal": sub.quantize(Decimal("0.01")),
+        "tax_percent": t_pct.quantize(Decimal("0.01")),
+        "tax_amount": tax_amt,
+        "grand_total": grand_total
+    }
+
+
+def calculate_project_kpis(
+    projects: list,
+    timesheets: list,
+    expenses: list
+) -> dict:
+    """
+    Calculate executive PSA telemetry:
+    - total_projects, active_projects, completed_projects
+    - total_budget, total_billed, total_actual_cost, profit_margin_percent
+    """
+    tot_proj = len(projects)
+    active_proj = 0
+    completed_proj = 0
+    tot_budget = Decimal("0.00")
+    tot_billed = Decimal("0.00")
+
+    for p in projects:
+        st = str(p.get("status", "") if isinstance(p, dict) else getattr(p, "status", "")).upper()
+        b_amt = to_decimal(p.get("budget_amount", 0) if isinstance(p, dict) else getattr(p, "budget_amount", 0))
+        billed = to_decimal(p.get("billed_amount", 0) if isinstance(p, dict) else getattr(p, "billed_amount", 0))
+
+        tot_budget += b_amt
+        tot_billed += billed
+        if st == "ACTIVE":
+            active_proj += 1
+        elif st == "COMPLETED":
+            completed_proj += 1
+
+    ts_res = calculate_timesheet_totals(timesheets)
+    labor_cost = ts_res["labor_cost"]
+
+    exp_cost = Decimal("0.00")
+    for e in expenses:
+        amt = to_decimal(e.get("amount", 0) if isinstance(e, dict) else getattr(e, "amount", 0))
+        exp_cost += amt
+
+    total_actual_cost = labor_cost + exp_cost
+    if tot_billed > Decimal("0.00"):
+        margin = (((tot_billed - total_actual_cost) / tot_billed) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        margin = Decimal("0.00")
+
+    return {
+        "total_projects": tot_proj,
+        "active_projects": active_proj,
+        "completed_projects": completed_proj,
+        "total_budget": tot_budget.quantize(Decimal("0.01")),
+        "total_billed": tot_billed.quantize(Decimal("0.01")),
+        "total_labor_cost": labor_cost.quantize(Decimal("0.01")),
+        "total_expense_cost": exp_cost.quantize(Decimal("0.01")),
+        "total_actual_cost": total_actual_cost.quantize(Decimal("0.01")),
+        "profit_margin_percent": margin,
+        "overall_utilization_rate": ts_res["utilization_rate"]
+    }
+
+
+
 
 
 

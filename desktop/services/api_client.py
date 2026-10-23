@@ -2013,6 +2013,237 @@ class ApiClient:
         return manufacturing_service.get_manufacturing_metrics(property_id=property_id).model_dump()
 
 
+    # -------------------------------------------------------------
+    # Project Management & Professional Services (PSA)
+    # -------------------------------------------------------------
+    def get_projects(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        priority: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if priority:
+            params["priority"] = priority
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return [p.model_dump() for p in project_service.list_projects(
+            organization_id=organization_id, property_id=property_id, status=status, priority=priority
+        )]
+
+    def get_project(self, project_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return project_service.get_project(project_id).model_dump()
+
+    def create_project(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=project_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import ProjectCreate
+        return project_service.create_project(ProjectCreate(**project_data)).model_dump()
+
+    def update_project(self, project_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json=update_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import ProjectUpdate
+        return project_service.update_project(project_id, ProjectUpdate(**update_data)).model_dump()
+
+    def get_project_milestones(self, project_id: str) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/milestones"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return [m.model_dump() for m in project_service.list_milestones(project_id)]
+
+    def create_project_milestone(self, project_id: str, milestone_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/milestones"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=milestone_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import MilestoneCreate
+        return project_service.create_milestone(project_id, MilestoneCreate(**milestone_data)).model_dump()
+
+    def mark_milestone_achieved(self, project_id: str, milestone_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/milestones/{milestone_id}/achieve"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return project_service.mark_milestone_achieved(project_id, milestone_id).model_dump()
+
+    def invoice_milestone(self, project_id: str, milestone_id: str, invoice_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/milestones/{milestone_id}/invoice"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=invoice_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import MilestoneInvoiceRequest
+        return project_service.invoice_milestone(project_id, milestone_id, MilestoneInvoiceRequest(**invoice_data)).model_dump()
+
+    def get_project_tasks(self, project_id: str) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/tasks"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return [t.model_dump() for t in project_service.list_tasks(project_id)]
+
+    def create_project_task(self, project_id: str, task_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/tasks"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=task_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import TaskCreate
+        return project_service.create_task(project_id, TaskCreate(**task_data)).model_dump()
+
+    def update_task_status(self, project_id: str, task_id: str, new_status: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/tasks/{task_id}/status"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, params={"new_status": new_status})
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return project_service.update_task_status(project_id, task_id, new_status).model_dump()
+
+    def get_project_timesheets(self, project_id: str) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/timesheets"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return [ts.model_dump() for ts in project_service.list_timesheets(project_id)]
+
+    def log_project_timesheet(self, project_id: str, timesheet_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/timesheets"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=timesheet_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import TimesheetCreate
+        return project_service.log_timesheet(project_id, TimesheetCreate(**timesheet_data)).model_dump()
+
+    def get_project_expenses(self, project_id: str) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/expenses"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return [e.model_dump() for e in project_service.list_expenses(project_id)]
+
+    def log_project_expense(self, project_id: str, expense_data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/{project_id}/expenses"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=expense_data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        from backend.app.schemas.project import ExpenseCreate
+        return project_service.log_expense(project_id, ExpenseCreate(**expense_data)).model_dump()
+
+    def get_project_metrics(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/projects/metrics/summary"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.project_service import project_service
+        return project_service.get_project_metrics(
+            organization_id=organization_id, property_id=property_id
+        ).model_dump()
+
+
 api_client = ApiClient()
 
 

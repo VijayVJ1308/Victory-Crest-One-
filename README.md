@@ -195,6 +195,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 10: Customer & Field Service Management Engine** (Omnichannel support incident ticketing, P1-P4 SLA tracking with real-time breach countdowns, field work order scheduling, technician dispatches, warehouse spare parts requisitions, and automated double-entry GL invoicing: DR 1020, CR 4040, CR 2020)
 - [x] **Phase 11: Hospitality & Resort PMS / Restaurant Dining Management** (Multi-property room rack & availability grid, room types, dynamic rate plans, reservations engine, express check-in/out, running guest folios with incidental postings, housekeeping room status transitions, restaurant dining tables floorplan, Kitchen Display System (KDS) order lifecycle, room folio transfer billing, and automated Finance GL night audit revenue recognition: DR 1020, CR 4010, CR 2020)
 - [x] **Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)** (Manufacturing work centers, multi-level Bills of Materials with scrap allowance, routing labor & machine steps, production orders with live state transitions, quality inspection checkpoints, WIP valuation, and automated double-entry GL inventory absorption: DR 1230 Finished Goods Inventory, CR 1210 Raw Materials Inventory, CR 5030 Manufacturing Direct Labor & Overhead)
+- [x] **Phase 13: Project Management & Professional Services (PSA)** (Work Breakdown Structures (WBS), project portfolios, task hierarchies, contract milestone deliverable schedules, billable and non-billable labor timesheets, direct project expenses, budget variance & burn rate analytics, and automated double-entry GL revenue recognition: DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue, CR 2020 GST Output Tax Payable 18%)
 
 ---
 
@@ -206,19 +207,19 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**184 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, and manufacturing BOM/scrap calculations
+**200 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, and project PSA budget/burn rate calculations
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, and Manufacturing Orders
-- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, and Project Management / PSA
+- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 15)
 
 ---
 
-## 📅 Next Phase: Phase 13 — Project Management & Professional Services (PSA)
-- Work Breakdown Structure (WBS), milestones, task hierarchies, and Gantt timeline scheduling
-- Resource allocation, capacity planning, and staff project assignments
-- Billable and non-billable timesheets, expense logging, and project budget burn rate tracking
-- Automated milestone-based Customer Invoicing and GL revenue recognition (DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue)
+## 📅 Next Phase: Phase 14 — Business Intelligence & Executive Analytics
+- Multi-dimensional executive KPI dashboards, revenue run-rates, and department cost center telemetry
+- Financial ratios, Gross Operating Profit (GOP), EBITDA, and portfolio profitability analysis
+- Interactive visual analytics, trend forecasting, and cohort retention metrics
+- Automated scheduled reporting & high-fidelity document exports (Excel `.xlsx`, formatted PDF reports via ReportLab, and CSV data extracts)
 
 
 
