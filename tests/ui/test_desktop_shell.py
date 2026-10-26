@@ -58,10 +58,14 @@ def test_main_window_shell_initialization(qapp):
     window.navigate_to("bi")
     assert window.view_stack.currentIndex() == 16
 
-    # Test navigation to a planned module (automation)
+    # Test navigation to an active module (automation)
     window.navigate_to("automation")
+    assert window.view_stack.currentIndex() == 17
+
+    # Test navigation to a planned module (ai_assistant)
+    window.navigate_to("ai_assistant")
     assert window.view_stack.currentIndex() == 2
-    assert window.planned_module_view.current_module_id == "automation"
+    assert window.planned_module_view.current_module_id == "ai_assistant"
     
     # Return to dashboard
     window.navigate_to("dashboard")

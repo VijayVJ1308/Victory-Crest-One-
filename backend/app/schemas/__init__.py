@@ -94,6 +94,17 @@ from backend.app.schemas.bi import (
     BiReportGenerateRequest,
     BiReportOut
 )
+from backend.app.schemas.automation import (
+    WorkflowCondition,
+    WorkflowActionSchema,
+    WorkflowRuleCreate,
+    WorkflowRuleUpdate,
+    WorkflowRuleOut,
+    WorkflowExecutionLogOut,
+    WorkflowDispatchEventRequest,
+    WorkflowDispatchResponse,
+    WorkflowTelemetryOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -275,7 +286,16 @@ __all__ = [
     "FinancialRatiosOut",
     "BiDashboardData",
     "BiReportGenerateRequest",
-    "BiReportOut"
+    "BiReportOut",
+    "WorkflowCondition",
+    "WorkflowActionSchema",
+    "WorkflowRuleCreate",
+    "WorkflowRuleUpdate",
+    "WorkflowRuleOut",
+    "WorkflowExecutionLogOut",
+    "WorkflowDispatchEventRequest",
+    "WorkflowDispatchResponse",
+    "WorkflowTelemetryOut"
 ]
 
 

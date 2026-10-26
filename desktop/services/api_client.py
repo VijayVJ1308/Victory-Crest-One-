@@ -2413,6 +2413,153 @@ class ApiClient:
         from backend.app.services.bi_service import bi_service
         return bi_service.get_report_file(report_id)
 
+    # =========================================================================
+    # Phase 15: Workflow Automation & Event Rules Engine
+    # =========================================================================
+
+    def get_automation_rules(
+        self,
+        property_id: Optional[str] = None,
+        status_filter: Optional[str] = None,
+        trigger_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/rules"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status_filter:
+            params["status"] = status_filter
+        if trigger_type:
+            params["trigger_type"] = trigger_type
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        return automation_service.get_rules(
+            property_id=property_id,
+            status_filter=status_filter,
+            trigger_type=trigger_type
+        )
+
+    def get_automation_rule(self, rule_id: str) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/rules/{rule_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        return automation_service.get_rule_by_id(rule_id)
+
+    def create_automation_rule(self, rule_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/rules"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=rule_data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        from backend.app.schemas.automation import WorkflowRuleCreate
+        return automation_service.create_rule(WorkflowRuleCreate(**rule_data))
+
+    def toggle_automation_rule(self, rule_id: str) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/rules/{rule_id}/toggle"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        return automation_service.toggle_rule(rule_id)
+
+    def dispatch_automation_event(
+        self,
+        event: str,
+        payload: Dict[str, Any],
+        property_id: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/dispatch"
+        req_body = {
+            "event": event,
+            "payload": payload,
+            "property_id": property_id
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=req_body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        return automation_service.dispatch_event(
+            event_name=event,
+            payload=payload,
+            property_id=property_id
+        )
+
+    def get_automation_logs(
+        self,
+        workflow_id: Optional[str] = None,
+        status_filter: Optional[str] = None,
+        limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/logs"
+        params = {"limit": limit}
+        if workflow_id:
+            params["workflow_id"] = workflow_id
+        if status_filter:
+            params["status"] = status_filter
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        return automation_service.get_execution_logs(
+            workflow_id=workflow_id,
+            status_filter=status_filter,
+            limit=limit
+        )
+
+    def get_automation_telemetry(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/automation/telemetry"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.automation_service import automation_service
+        telem = automation_service.get_telemetry()
+        # Convert Decimal values to float/str if needed
+        return {
+            "total_rules": telem["total_rules"],
+            "active_rules": telem["active_rules"],
+            "paused_rules": telem["paused_rules"],
+            "total_executions": telem["total_executions"],
+            "success_count": telem["success_count"],
+            "failed_count": telem["failed_count"],
+            "skipped_count": telem["skipped_count"],
+            "success_rate_percent": str(telem["success_rate_percent"]),
+            "avg_duration_ms": str(telem["avg_duration_ms"]),
+            "total_actions_triggered": telem["total_actions_triggered"],
+            "recent_logs": telem.get("recent_logs", [])
+        }
+
 
 api_client = ApiClient()
 

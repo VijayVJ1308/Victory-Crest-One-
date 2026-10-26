@@ -3,7 +3,7 @@ Decimal-safe and zero-division-protected calculation functions for KPIs, hospita
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Union, Optional
+from typing import Union, Optional, Dict, List, Any
 from datetime import datetime, timezone
 
 Number = Union[int, float, Decimal]
@@ -1536,6 +1536,204 @@ def calculate_linear_forecast(historical_points: list, periods_ahead: int = 1) -
         "growth_rate_percent": growth,
         "historical_mean": mean_val
     }
+
+
+# ============================================================================
+# Phase 15: Workflow Automation & Event Rules Engine Calculations
+# ============================================================================
+
+def _resolve_nested_field(data: Dict[str, Any], field_path: str) -> Any:
+    """Resolve a dot-notated field path such as 'guest.tier' or 'stock.current'."""
+    if not field_path:
+        return None
+    parts = field_path.split(".")
+    curr = data
+    for part in parts:
+        if isinstance(curr, dict):
+            curr = curr.get(part)
+        else:
+            return None
+    return curr
+
+
+def evaluate_rule_condition(field_value: Any, operator: str, target_value: Any) -> bool:
+    """
+    Evaluate a single condition between a dynamic field value and a target rule value.
+    Supports Decimal-safe numeric comparisons, string matching, contains, and list membership.
+    """
+    op = str(operator).strip().upper()
+
+    # Try numeric conversion for comparison operators
+    def _to_num(val: Any) -> Optional[Decimal]:
+        if val is None or isinstance(val, bool):
+            return None
+        if isinstance(val, (int, float, Decimal)):
+            return to_decimal(val)
+        if isinstance(val, str):
+            val_str = val.strip()
+            if not val_str:
+                return None
+            try:
+                float(val_str)
+                return Decimal(val_str)
+            except Exception:
+                return None
+        return None
+
+    # Handle numeric comparisons
+    if op in ("GREATER_THAN", "GT", ">"):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num > t_num
+        return False
+
+    if op in ("GREATER_THAN_OR_EQUAL", "GTE", ">="):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num >= t_num
+        return False
+
+    if op in ("LESS_THAN", "LT", "<"):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num < t_num
+        return False
+
+    if op in ("LESS_THAN_OR_EQUAL", "LTE", "<="):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num <= t_num
+        return False
+
+    if op in ("EQUALS", "EQ", "=="):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num == t_num
+        # Fallback to string comparison
+        return str(field_value).strip().lower() == str(target_value).strip().lower()
+
+    if op in ("NOT_EQUALS", "NEQ", "!="):
+        f_num, t_num = _to_num(field_value), _to_num(target_value)
+        if f_num is not None and t_num is not None:
+            return f_num != t_num
+        return str(field_value).strip().lower() != str(target_value).strip().lower()
+
+    if op in ("CONTAINS", "CONTAIN"):
+        if field_value is None:
+            return False
+        if isinstance(field_value, (list, tuple, set)):
+            return target_value in field_value or str(target_value).lower() in [str(x).lower() for x in field_value]
+        return str(target_value).lower() in str(field_value).lower()
+
+    if op in ("IN", "EXISTS_IN"):
+        if target_value is None:
+            return False
+        if isinstance(target_value, (list, tuple, set)):
+            return field_value in target_value or str(field_value).lower() in [str(x).lower() for x in target_value]
+        if isinstance(target_value, str):
+            parts = [p.strip().lower() for p in target_value.split(",")]
+            return str(field_value).strip().lower() in parts
+        return False
+
+    return False
+
+
+def evaluate_workflow_conditions(
+    conditions: List[Dict[str, Any]],
+    context_data: Dict[str, Any],
+    match_mode: str = "ALL"
+) -> bool:
+    """
+    Evaluate a sequence of rule conditions against event payload/context data.
+    match_mode can be 'ALL' (logical AND) or 'ANY' (logical OR).
+    An empty condition set returns True.
+    """
+    if not conditions:
+        return True
+
+    results = []
+    for cond in conditions:
+        field_path = cond.get("field", "")
+        op = cond.get("operator", "EQUALS")
+        target_val = cond.get("value")
+        field_val = _resolve_nested_field(context_data, field_path)
+        is_met = evaluate_rule_condition(field_val, op, target_val)
+        results.append(is_met)
+
+    mode = str(match_mode).strip().upper()
+    if mode == "ANY":
+        return any(results)
+    return all(results)
+
+
+def calculate_workflow_kpis(executions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Compute aggregate performance telemetry for workflow executions:
+    - total_executions
+    - success_count
+    - failed_count
+    - skipped_count
+    - success_rate_percent (Decimal quantized to 2 decimal places)
+    - avg_duration_ms (Decimal quantized to 2 decimal places)
+    - total_actions_triggered
+    """
+    total = len(executions)
+    if total == 0:
+        return {
+            "total_executions": 0,
+            "success_count": 0,
+            "failed_count": 0,
+            "skipped_count": 0,
+            "success_rate_percent": Decimal("0.00"),
+            "avg_duration_ms": Decimal("0.00"),
+            "total_actions_triggered": 0
+        }
+
+    success = 0
+    failed = 0
+    skipped = 0
+    total_actions = 0
+    total_duration = Decimal("0.00")
+
+    for ex in executions:
+        st = str(ex.get("status", "")).upper()
+        if st == "SUCCESS":
+            success += 1
+        elif st == "FAILED":
+            failed += 1
+        elif st == "SKIPPED":
+            skipped += 1
+
+        actions = ex.get("actions_executed") or []
+        if isinstance(actions, list):
+            total_actions += len(actions)
+
+        dur = ex.get("duration_ms", 0)
+        try:
+            total_duration += to_decimal(dur)
+        except Exception:
+            pass
+
+    evaluated = success + failed
+    if evaluated > 0:
+        success_rate = ((Decimal(success) / Decimal(evaluated)) * Decimal("100.00")).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+    else:
+        success_rate = Decimal("100.00") if skipped > 0 else Decimal("0.00")
+
+    avg_duration = (total_duration / Decimal(total)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "total_executions": total,
+        "success_count": success,
+        "failed_count": failed,
+        "skipped_count": skipped,
+        "success_rate_percent": success_rate,
+        "avg_duration_ms": avg_duration,
+        "total_actions_triggered": total_actions
+    }
+
 
 
 

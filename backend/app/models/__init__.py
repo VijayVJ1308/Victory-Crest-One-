@@ -96,6 +96,10 @@ from backend.app.models.bi import (
     BiReportSnapshot,
     BiSavedQuery
 )
+from backend.app.models.automation import (
+    WorkflowRule,
+    WorkflowExecutionLog
+)
 
 __all__ = [
     "Base",
@@ -172,7 +176,9 @@ __all__ = [
     "ProjectTimesheet",
     "ProjectExpense",
     "BiReportSnapshot",
-    "BiSavedQuery"
+    "BiSavedQuery",
+    "WorkflowRule",
+    "WorkflowExecutionLog"
 ]
 
 

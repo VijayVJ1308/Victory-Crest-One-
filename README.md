@@ -197,6 +197,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)** (Manufacturing work centers, multi-level Bills of Materials with scrap allowance, routing labor & machine steps, production orders with live state transitions, quality inspection checkpoints, WIP valuation, and automated double-entry GL inventory absorption: DR 1230 Finished Goods Inventory, CR 1210 Raw Materials Inventory, CR 5030 Manufacturing Direct Labor & Overhead)
 - [x] **Phase 13: Project Management & Professional Services (PSA)** (Work Breakdown Structures (WBS), project portfolios, task hierarchies, contract milestone deliverable schedules, billable and non-billable labor timesheets, direct project expenses, budget variance & burn rate analytics, and automated double-entry GL revenue recognition: DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue, CR 2020 GST Output Tax Payable 18%)
 - [x] **Phase 14: Business Intelligence & Executive Analytics** (Multi-dimensional executive KPI dashboards, Gross Operating Profit (GOP), EBITDA, departmental P&L contribution, physical property benchmarking, financial health ratios, linear predictive revenue forecasting, and high-fidelity multi-format document exports in Excel `.xlsx`, PDF with ReportLab corporate dossier formatting, and RFC-4180 CSV)
+- [x] **Phase 15: Workflow Automation & Event Rules Engine** (Event triggers across modules, state change & threshold condition evaluators, automated action pipelines [task dispatch, PO reorder requisitions, GL journal entries, notifications, webhooks], execution audit trail logs, and interactive desktop event simulator)
 
 ---
 
@@ -208,19 +209,20 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**216 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, project PSA budget/burn rate, and BI financial ratios / forecasting calculations
+**231 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, project PSA budget/burn rate, BI financial ratios / forecasting, and workflow rule condition evaluators / KPI telemetry
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, Project Management / PSA, and Business Intelligence / Document Exports
-- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 16)
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, Project Management / PSA, Business Intelligence / Document Exports, and Workflow Automation / Event Dispatching
+- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 17)
 
 ---
 
-## 📅 Next Phase: Phase 15 — Workflow Automation & Event Rules Engine
-- Event triggers (state changes, cron timers, thresholds, inbound webhooks)
-- Rule condition evaluator and multi-step automated execution pipelines
-- Cross-module event bus (e.g. low stock triggers PO requisition, customer VIP status triggers concierge notification)
-- Desktop automation builder view with execution logs and workflow diagnostics
+## 📅 Next Phase: Phase 16 — AI Business Assistant
+- Role-based semantic Q&A and natural language executive inquiry
+- Structured data summarization and operational synthesis
+- Strict tenant and permission-aware data retrieval guards
+- Desktop interactive conversational assistant view
+
 
 
 

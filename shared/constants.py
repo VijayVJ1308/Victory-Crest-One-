@@ -173,21 +173,21 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "status": "active"
     },
     {
-        "id": "ai_assistant",
-        "name": "AI Business Assistant",
-        "category": CATEGORY_CORE,
-        "icon": "🤖",
-        "description": "Permission-aware query engine, safe semantic summaries, and executive Q&A.",
-        "phase": 15,
-        "status": "planned"
-    },
-    {
         "id": "automation",
         "name": "Workflow Automation",
         "category": CATEGORY_CORE,
         "icon": "⚡",
         "description": "Event-driven triggers, approval escalations, scheduled tasks, and webhook actions.",
         "phase": 15,
+        "status": "active"
+    },
+    {
+        "id": "ai_assistant",
+        "name": "AI Business Assistant",
+        "category": CATEGORY_CORE,
+        "icon": "🤖",
+        "description": "Permission-aware query engine, safe semantic summaries, and executive Q&A.",
+        "phase": 16,
         "status": "planned"
     },
     {

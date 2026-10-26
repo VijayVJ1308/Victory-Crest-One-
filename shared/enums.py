@@ -616,6 +616,53 @@ class AnalyticalDimension(str, Enum):
     CUSTOMER_SEGMENT = "CUSTOMER_SEGMENT"
 
 
+# ============================================================================
+# Phase 15: Workflow Automation & Event Rules Engine
+# ============================================================================
+
+class TriggerType(str, Enum):
+    STATE_CHANGE = "STATE_CHANGE"
+    SCHEDULED_CRON = "SCHEDULED_CRON"
+    THRESHOLD = "THRESHOLD"
+    WEBHOOK = "WEBHOOK"
+    MANUAL = "MANUAL"
+
+
+class ActionType(str, Enum):
+    SEND_NOTIFICATION = "SEND_NOTIFICATION"
+    CREATE_TASK = "CREATE_TASK"
+    TRIGGER_PURCHASE_ORDER = "TRIGGER_PURCHASE_ORDER"
+    POST_GL_JOURNAL = "POST_GL_JOURNAL"
+    WEBHOOK_CALL = "WEBHOOK_CALL"
+    UPDATE_STATUS = "UPDATE_STATUS"
+
+
+class WorkflowStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    PAUSED = "PAUSED"
+    DRAFT = "DRAFT"
+    ARCHIVED = "ARCHIVED"
+
+
+class ExecutionStatus(str, Enum):
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    SKIPPED = "SKIPPED"
+    RUNNING = "RUNNING"
+
+
+class ComparisonOperator(str, Enum):
+    EQUALS = "EQUALS"
+    NOT_EQUALS = "NOT_EQUALS"
+    GREATER_THAN = "GREATER_THAN"
+    GREATER_THAN_OR_EQUAL = "GREATER_THAN_OR_EQUAL"
+    LESS_THAN = "LESS_THAN"
+    LESS_THAN_OR_EQUAL = "LESS_THAN_OR_EQUAL"
+    CONTAINS = "CONTAINS"
+    IN = "IN"
+
+
+
 
 
 
