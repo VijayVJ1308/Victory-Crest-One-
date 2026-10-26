@@ -104,6 +104,10 @@ from backend.app.models.ai_assistant import (
     AiConversationThread,
     AiMessageLog
 )
+from backend.app.models.iot import (
+    IoTDevice,
+    IoTTelemetryReading
+)
 
 __all__ = [
     "Base",
@@ -184,10 +188,8 @@ __all__ = [
     "WorkflowRule",
     "WorkflowExecutionLog",
     "AiConversationThread",
-    "AiMessageLog"
+    "AiMessageLog",
+    "IoTDevice",
+    "IoTTelemetryReading"
 ]
-
-
-
-
 

@@ -197,6 +197,15 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📡",
         "description": "Smart energy meters, guestroom automation, kitchen sensors, and asset telemetry.",
         "phase": 17,
+        "status": "active"
+    },
+    {
+        "id": "analytics_lake",
+        "name": "Data Lakehouse & Predictive ML",
+        "category": CATEGORY_CORE,
+        "icon": "🔮",
+        "description": "Distributed parquet data lake, cross-enterprise machine learning models, and automated forecasting.",
+        "phase": 18,
         "status": "planned"
     },
     {

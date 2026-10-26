@@ -1855,11 +1855,163 @@ def calculate_ai_assistant_metrics(history: List[Dict[str, Any]]) -> Dict[str, A
     }
 
 
+# ============================================================================
+# Phase 17: IoT & Smart Device Gateways Calculations
+# ============================================================================
+
+def evaluate_sensor_threshold(
+    sensor_type: str,
+    reading: Number,
+    min_threshold: Optional[Number] = None,
+    max_threshold: Optional[Number] = None
+) -> Tuple[bool, str, str]:
+    """
+    Evaluate sensor telemetry against operational thresholds.
+    Returns: (is_breached: bool, alert_severity: str, message: str)
+    Alert severity is one of: INFO, WARNING, CRITICAL.
+    """
+    val = to_decimal(reading)
+    min_val = to_decimal(min_threshold) if min_threshold is not None else None
+    max_val = to_decimal(max_threshold) if max_threshold is not None else None
+
+    # Check upper threshold breach
+    if max_val is not None and val > max_val:
+        diff = val - max_val
+        # Determine if breach is CRITICAL vs WARNING
+        if diff >= Decimal("5.0") or (max_val > Decimal("0") and (diff / max_val) >= Decimal("0.20")):
+            severity = "CRITICAL"
+        else:
+            severity = "WARNING"
+        msg = f"{sensor_type} reading ({val}) exceeded upper threshold ({max_val}) by {diff.quantize(Decimal('0.01'))}"
+        return True, severity, msg
+
+    # Check lower threshold breach
+    if min_val is not None and val < min_val:
+        diff = min_val - val
+        if diff >= Decimal("5.0") or (min_val > Decimal("0") and (diff / min_val) >= Decimal("0.20")):
+            severity = "CRITICAL"
+        else:
+            severity = "WARNING"
+        msg = f"{sensor_type} reading ({val}) fell below lower threshold ({min_val}) by {diff.quantize(Decimal('0.01'))}"
+        return True, severity, msg
+
+    return False, "INFO", f"{sensor_type} reading ({val}) is nominal within bounds."
 
 
+def calculate_power_consumption_cost(
+    kwh: Number,
+    tariff_per_kwh: Number = Decimal("8.50")
+) -> Decimal:
+    """
+    Calculate commercial power consumption cost.
+    Default tariff: ₹8.50 / kWh (Standard commercial HT grid rate).
+    """
+    units = to_decimal(kwh)
+    rate = to_decimal(tariff_per_kwh)
+    if units <= Decimal("0") or rate <= Decimal("0"):
+        return Decimal("0.00")
+    cost = units * rate
+    return cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def calculate_iot_portfolio_metrics(
+    devices: List[Dict[str, Any]],
+    telemetry_readings: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    """
+    Calculate operational metrics across an enterprise IoT device fleet.
+    Zero-division safe.
+    """
+    total_devices = len(devices)
+    if total_devices == 0:
+        return {
+            "total_devices": 0,
+            "online_devices": 0,
+            "offline_devices": 0,
+            "alert_devices": 0,
+            "maintenance_devices": 0,
+            "online_rate_percent": Decimal("0.00"),
+            "total_power_kwh": Decimal("0.00"),
+            "total_power_cost": Decimal("0.00"),
+            "cold_storage_compliance_percent": Decimal("100.00"),
+            "active_alerts_count": 0,
+            "avg_battery_percent": Decimal("100.00")
+        }
 
+    online_count = 0
+    offline_count = 0
+    alert_count = 0
+    maint_count = 0
+    battery_sum = Decimal("0.00")
+    battery_reporting_count = 0
 
+    for d in devices:
+        status = str(d.get("status", "ONLINE")).upper()
+        if status == "ONLINE":
+            online_count += 1
+        elif status == "OFFLINE":
+            offline_count += 1
+        elif status == "ALERT":
+            alert_count += 1
+        elif status == "MAINTENANCE":
+            maint_count += 1
 
+        batt = d.get("battery_level_percent")
+        if batt is not None:
+            try:
+                battery_sum += to_decimal(batt)
+                battery_reporting_count += 1
+            except Exception:
+                pass
+
+    online_rate = ((Decimal(online_count) / Decimal(total_devices)) * Decimal("100.00")).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+
+    avg_battery = Decimal("100.00")
+    if battery_reporting_count > 0:
+        avg_battery = (battery_sum / Decimal(battery_reporting_count)).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
+    # Process telemetry readings if provided
+    total_power = Decimal("0.00")
+    cold_storage_total = 0
+    cold_storage_compliant = 0
+    active_alerts = alert_count
+
+    if telemetry_readings:
+        for r in telemetry_readings:
+            reading_type = str(r.get("telemetry_type", "")).upper()
+            val = to_decimal(r.get("reading_value", 0))
+
+            if "POWER" in reading_type or reading_type == "POWER_KWH":
+                total_power += val
+
+            if "COLD" in str(r.get("device_type", "")).upper() or reading_type == "TEMPERATURE_CELSIUS":
+                cold_storage_total += 1
+                if not r.get("is_breach", False):
+                    cold_storage_compliant += 1
+
+    cold_compliance = Decimal("100.00")
+    if cold_storage_total > 0:
+        cold_compliance = ((Decimal(cold_storage_compliant) / Decimal(cold_storage_total)) * Decimal("100.00")).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
+    power_cost = calculate_power_consumption_cost(total_power)
+
+    return {
+        "total_devices": total_devices,
+        "online_devices": online_count,
+        "offline_devices": offline_count,
+        "alert_devices": alert_count,
+        "maintenance_devices": maint_count,
+        "online_rate_percent": online_rate,
+        "total_power_kwh": total_power.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "total_power_cost": power_cost,
+        "cold_storage_compliance_percent": cold_compliance,
+        "active_alerts_count": active_alerts,
+        "avg_battery_percent": avg_battery
+    }
 

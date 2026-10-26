@@ -27,6 +27,7 @@ class ModuleType(str, Enum):
     DOCUMENTS = "documents"
     AUTOMATION = "automation"
     AI_ASSISTANT = "ai_assistant"
+    IOT_GATEWAYS = "iot_gateways"
     SETTINGS = "settings"
 
 
@@ -695,6 +696,40 @@ class AiSafetyRating(str, Enum):
     SAFE = "SAFE"
     CONFIDENTIAL_RESTRICTED = "CONFIDENTIAL_RESTRICTED"
     NEEDS_ELEVATED_PERMISSION = "NEEDS_ELEVATED_PERMISSION"
+
+
+# ============================================================================
+# Phase 17: IoT & Smart Device Gateways
+# ============================================================================
+
+class DeviceType(str, Enum):
+    SMART_ENERGY_METER = "SMART_ENERGY_METER"
+    ROOM_CLIMATE_THERMOSTAT = "ROOM_CLIMATE_THERMOSTAT"
+    SMART_DOOR_LOCK = "SMART_DOOR_LOCK"
+    KITCHEN_COLD_STORAGE_SENSOR = "KITCHEN_COLD_STORAGE_SENSOR"
+    HVAC_AIR_QUALITY_MONITOR = "HVAC_AIR_QUALITY_MONITOR"
+
+
+class DeviceStatus(str, Enum):
+    ONLINE = "ONLINE"
+    OFFLINE = "OFFLINE"
+    ALERT = "ALERT"
+    MAINTENANCE = "MAINTENANCE"
+
+
+class SensorTelemetryType(str, Enum):
+    POWER_KWH = "POWER_KWH"
+    TEMPERATURE_CELSIUS = "TEMPERATURE_CELSIUS"
+    HUMIDITY_PERCENT = "HUMIDITY_PERCENT"
+    DOOR_STATE = "DOOR_STATE"
+    AIR_QUALITY_AQI = "AIR_QUALITY_AQI"
+
+
+class AlertSeverity(str, Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
+
 
 
 

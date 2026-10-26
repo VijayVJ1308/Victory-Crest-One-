@@ -112,6 +112,16 @@ from backend.app.schemas.ai_assistant import (
     AiThreadOut,
     AiAssistantTelemetryOut
 )
+from backend.app.schemas.iot import (
+    IoTDeviceCreate,
+    IoTDeviceUpdate,
+    IoTDeviceOut,
+    IoTTelemetryIngestRequest,
+    IoTTelemetryReadingOut,
+    IoTDeviceCommandRequest,
+    IoTDeviceCommandResponse,
+    IoTMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -307,8 +317,17 @@ __all__ = [
     "AiQueryResponse",
     "AiMessageOut",
     "AiThreadOut",
-    "AiAssistantTelemetryOut"
+    "AiAssistantTelemetryOut",
+    "IoTDeviceCreate",
+    "IoTDeviceUpdate",
+    "IoTDeviceOut",
+    "IoTTelemetryIngestRequest",
+    "IoTTelemetryReadingOut",
+    "IoTDeviceCommandRequest",
+    "IoTDeviceCommandResponse",
+    "IoTMetricsOut"
 ]
+
 
 
 

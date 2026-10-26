@@ -2647,8 +2647,178 @@ class ApiClient:
         from backend.app.services.ai_assistant_service import ai_assistant_service
         return ai_assistant_service.reset_threads()
 
+    # =========================================================================
+    # Phase 17: IoT & Smart Device Gateways
+    # =========================================================================
+
+    def get_iot_devices(
+        self,
+        property_id: Optional[str] = None,
+        device_type: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if device_type:
+            params["device_type"] = device_type
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        return iot_service.get_devices(property_id=property_id, device_type=device_type, status=status)
+
+    def get_iot_device(self, device_id: str) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices/{device_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        return iot_service.get_device_by_id(device_id)
+
+    def create_iot_device(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        from backend.app.schemas.iot import IoTDeviceCreate
+        return iot_service.create_device(IoTDeviceCreate(**data))
+
+    def update_iot_device(self, device_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices/{device_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json=data)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        from backend.app.schemas.iot import IoTDeviceUpdate
+        return iot_service.update_device(device_id, IoTDeviceUpdate(**data))
+
+    def delete_iot_device(self, device_id: str) -> bool:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices/{device_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.delete(url)
+                if res.status_code == 204:
+                    return True
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        return iot_service.delete_device(device_id)
+
+    def ingest_iot_telemetry(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/telemetry/ingest"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        from backend.app.schemas.iot import IoTTelemetryIngestRequest
+        return iot_service.ingest_telemetry(IoTTelemetryIngestRequest(**data))
+
+    def get_iot_telemetry_history(
+        self,
+        property_id: Optional[str] = None,
+        device_id: Optional[str] = None,
+        device_code: Optional[str] = None,
+        limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/telemetry/history"
+        params = {"limit": limit}
+        if property_id:
+            params["property_id"] = property_id
+        if device_id:
+            params["device_id"] = device_id
+        if device_code:
+            params["device_code"] = device_code
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        return iot_service.get_telemetry_history(
+            property_id=property_id,
+            device_id=device_id,
+            device_code=device_code,
+            limit=limit
+        )
+
+    def send_iot_device_command(
+        self,
+        device_id: str,
+        command: str,
+        parameters: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/devices/{device_id}/command"
+        body = {"command": command, "parameters": parameters or {}}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        return iot_service.send_device_command(
+            device_id_or_code=device_id,
+            command=command,
+            parameters=parameters
+        )
+
+    def get_iot_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/iot/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.iot_service import iot_service
+        metrics = iot_service.get_portfolio_metrics(property_id=property_id)
+        return {
+            "total_devices": metrics["total_devices"],
+            "online_devices": metrics["online_devices"],
+            "offline_devices": metrics["offline_devices"],
+            "alert_devices": metrics["alert_devices"],
+            "maintenance_devices": metrics["maintenance_devices"],
+            "online_rate_percent": str(metrics["online_rate_percent"]),
+            "total_power_kwh": str(metrics["total_power_kwh"]),
+            "total_power_cost": str(metrics["total_power_cost"]),
+            "cold_storage_compliance_percent": str(metrics["cold_storage_compliance_percent"]),
+            "active_alerts_count": metrics["active_alerts_count"],
+            "avg_battery_percent": str(metrics["avg_battery_percent"])
+        }
+
 
 api_client = ApiClient()
+
 
 
 
