@@ -213,6 +213,12 @@ class InventoryView(QWidget):
         self.stock_status_combo.currentIndexChanged.connect(self.filter_stock_table)
         ctrl_row.addWidget(self.stock_status_combo, 1)
 
+        btn_edit_stock = QPushButton("✏️ Edit Stock Item")
+        btn_edit_stock.setProperty("class", "btn_secondary")
+        btn_edit_stock.setToolTip("Edit selected stock item quantities, unit cost, or details")
+        btn_edit_stock.clicked.connect(self.edit_selected_stock)
+        ctrl_row.addWidget(btn_edit_stock)
+
         layout.addLayout(ctrl_row)
 
         # Stock Table
@@ -227,8 +233,14 @@ class InventoryView(QWidget):
         self.stock_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
         self.stock_table.horizontalHeader().setSectionResizeMode(10, QHeaderView.ResizeToContents)
         self.stock_table.setAlternatingRowColors(True)
+        self.stock_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.stock_table.cellDoubleClicked.connect(self.on_stock_double_clicked)
         self.stock_table.setStyleSheet(self._table_stylesheet())
         layout.addWidget(self.stock_table)
+
+        lbl_hint = QLabel("💡 Tip: Double-click any row (or select and click '✏️ Edit Stock Item') to modify product names, on-hand quantities, reorder thresholds, or unit costs.")
+        lbl_hint.setStyleSheet(f"color: {ThemeColors.TEXT_MUTED}; font-size: 11px; font-style: italic; margin-top: 4px;")
+        layout.addWidget(lbl_hint)
 
         return container
 
@@ -426,11 +438,14 @@ class InventoryView(QWidget):
 
         # 2. Fetch Metrics
         metrics = api_client.get_inventory_metrics()
-        self.update_summary_card(self.kpi_valuation, f"₹{metrics.get('total_inventory_valuation', 0):,.2f}")
-        self.update_summary_card(self.kpi_total_units, f"{metrics.get('total_stock_units', 0):,.0f} Units")
+        val_metric = to_decimal(metrics.get('total_inventory_valuation', 0))
+        units_metric = to_decimal(metrics.get('total_stock_units', 0))
+        open_po_val = to_decimal(metrics.get('total_open_po_value', 0))
+        self.update_summary_card(self.kpi_valuation, f"₹{val_metric:,.2f}")
+        self.update_summary_card(self.kpi_total_units, f"{units_metric:,.0f} Units")
         self.update_summary_card(self.kpi_active_skus, f"{metrics.get('total_active_skus', 0)} SKUs")
         self.update_summary_card(self.kpi_low_stock, f"{metrics.get('low_stock_items_count', 0)} Items")
-        self.update_summary_card(self.kpi_open_pos, f"{metrics.get('active_purchase_orders_count', 0)} POs (₹{metrics.get('total_open_po_value', 0):,.2f})")
+        self.update_summary_card(self.kpi_open_pos, f"{metrics.get('active_purchase_orders_count', 0)} POs (₹{open_po_val:,.2f})")
 
         # 3. Fetch Stock Catalog
         self.cached_stocks = api_client.get_stock()
@@ -788,7 +803,7 @@ class InventoryView(QWidget):
                 res = api_client.create_purchase_order(po_payload)
                 QMessageBox.information(
                     dialog, "PO Issued Successfully",
-                    f"Purchase Order {res.get('po_number')} created for ₹{res.get('total_amount', 0):,.2f}!\nStatus: ISSUED to {res.get('supplier_name')}."
+                    f"Purchase Order {res.get('po_number')} created for ₹{to_decimal(res.get('total_amount', 0)):,.2f}!\nStatus: ISSUED to {res.get('supplier_name')}."
                 )
                 dialog.accept()
                 self.refresh_data()
@@ -1147,7 +1162,7 @@ class InventoryView(QWidget):
                     dialog, "Reconciliation Complete",
                     f"Session {res.get('session_code')} reconciled!\n"
                     f"Items Counted: {res.get('total_items_counted')}\n"
-                    f"Total Discrepancy Value: ₹{res.get('total_variance_value', 0):,.2f}\n"
+                    f"Total Discrepancy Value: ₹{to_decimal(res.get('total_variance_value', 0)):,.2f}\n"
                     f"Inventory ledger adjusted."
                 )
                 dialog.accept()
@@ -1157,6 +1172,129 @@ class InventoryView(QWidget):
 
         btn_submit.clicked.connect(submit)
         btn_row.addWidget(btn_submit)
+        layout.addLayout(btn_row)
+
+        dialog.exec()
+
+    # ---------------------------------------------------------
+    # Stock Item Editing
+    # ---------------------------------------------------------
+    def on_stock_double_clicked(self, row: int, column: int):
+        item_sku = self.stock_table.item(row, 0)
+        if not item_sku:
+            return
+        stock_data = item_sku.data(Qt.UserRole)
+        if stock_data:
+            self.open_edit_stock_dialog(stock_data)
+
+    def edit_selected_stock(self):
+        row = self.stock_table.currentRow()
+        if row < 0:
+            QMessageBox.information(self, "Selection Required", "Please select a stock item row from the table to edit.")
+            return
+        item_sku = self.stock_table.item(row, 0)
+        if not item_sku:
+            return
+        stock_data = item_sku.data(Qt.UserRole)
+        if stock_data:
+            self.open_edit_stock_dialog(stock_data)
+
+    def open_edit_stock_dialog(self, stock_data: Dict[str, Any]):
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"✏️ Edit Stock Item — {stock_data.get('sku')}")
+        dialog.setMinimumWidth(480)
+
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(14)
+
+        hdr = QLabel(f"Edit Stock Record: {stock_data.get('sku')}")
+        hdr.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {ThemeColors.TEXT_MAIN};")
+        sub = QLabel(f"Warehouse: {stock_data.get('warehouse_name', 'N/A')}")
+        sub.setStyleSheet(f"font-size: 12px; color: {ThemeColors.TEXT_MUTED};")
+        layout.addWidget(hdr)
+        layout.addWidget(sub)
+
+        form = QFormLayout()
+        form.setSpacing(12)
+
+        lbl_sku = QLabel(stock_data.get("sku", "N/A"))
+        lbl_sku.setStyleSheet(f"font-weight: 700; color: {ThemeColors.PRIMARY}; font-size: 13px;")
+        form.addRow("SKU Identifier:", lbl_sku)
+
+        txt_name = QLineEdit(stock_data.get("product_name", ""))
+        form.addRow("Product Name*:", txt_name)
+
+        txt_cat = QLineEdit(stock_data.get("category", "General"))
+        form.addRow("Category:", txt_cat)
+
+        lbl_uom = QLabel(stock_data.get("unit_of_measure", "UNIT"))
+        lbl_uom.setStyleSheet(f"color: {ThemeColors.TEXT_MUTED};")
+        form.addRow("Unit of Measure:", lbl_uom)
+
+        spin_qoh = QDoubleSpinBox()
+        spin_qoh.setRange(0, 1000000)
+        spin_qoh.setDecimals(2)
+        spin_qoh.setValue(float(to_decimal(stock_data.get("quantity_on_hand", 0))))
+        form.addRow("Quantity On-Hand (QOH):", spin_qoh)
+
+        spin_rop = QDoubleSpinBox()
+        spin_rop.setRange(0, 1000000)
+        spin_rop.setDecimals(2)
+        spin_rop.setValue(float(to_decimal(stock_data.get("reorder_point", 0))))
+        form.addRow("Reorder Point (Threshold):", spin_rop)
+
+        spin_cost = QDoubleSpinBox()
+        spin_cost.setRange(0, 10000000)
+        spin_cost.setDecimals(2)
+        spin_cost.setPrefix("₹ ")
+        spin_cost.setValue(float(to_decimal(stock_data.get("unit_cost", 0))))
+        form.addRow("Unit Cost (AVCO Valuation):", spin_cost)
+
+        layout.addLayout(form)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+
+        btn_cancel = QPushButton("Cancel")
+        btn_cancel.setProperty("class", "btn_secondary")
+        btn_cancel.clicked.connect(dialog.reject)
+        btn_row.addWidget(btn_cancel)
+
+        btn_save = QPushButton("💾 Save Changes")
+        btn_save.setProperty("class", "btn_primary")
+
+        def save():
+            name = txt_name.text().strip()
+            cat = txt_cat.text().strip()
+            if not name:
+                QMessageBox.warning(dialog, "Validation Error", "Product Name cannot be empty.")
+                return
+
+            payload = {
+                "product_name": name,
+                "category": cat or "General",
+                "quantity_on_hand": float(spin_qoh.value()),
+                "reorder_point": float(spin_rop.value()),
+                "unit_cost": float(spin_cost.value())
+            }
+            stock_id = stock_data.get("id") or f"{stock_data.get('warehouse_id')}_{stock_data.get('sku')}"
+            try:
+                res = api_client.update_stock_item(stock_id, payload)
+                dialog.accept()
+                QMessageBox.information(
+                    self, "Stock Item Updated",
+                    f"Successfully updated '{res.get('product_name')}'.\n"
+                    f"New On-Hand: {float(to_decimal(res.get('quantity_on_hand', 0))):,.2f} {res.get('unit_of_measure')}\n"
+                    f"New Valuation: ₹{float(to_decimal(res.get('total_value', 0))):,.2f}\n"
+                    f"Status: {res.get('stock_status')}"
+                )
+                self.refresh_data()
+            except Exception as e:
+                QMessageBox.critical(dialog, "Update Error", f"Failed to save stock item: {e}")
+
+        btn_save.clicked.connect(save)
+        btn_row.addWidget(btn_save)
         layout.addLayout(btn_row)
 
         dialog.exec()

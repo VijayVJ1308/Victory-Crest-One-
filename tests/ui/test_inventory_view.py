@@ -31,6 +31,15 @@ def test_inventory_view_stock_filtering(qapp):
     assert view.stock_table.rowCount() == initial_rows
 
 
+def test_inventory_view_edit_stock(qapp, monkeypatch):
+    called = []
+    view = InventoryView()
+    monkeypatch.setattr(view, "open_edit_stock_dialog", lambda s: called.append(s))
+    view.on_stock_double_clicked(0, 0)
+    assert len(called) == 1
+    assert "sku" in called[0]
+
+
 def test_main_window_inventory_and_erp_navigation(qapp):
     window = MainWindow()
     assert "inventory" in window.nav_buttons

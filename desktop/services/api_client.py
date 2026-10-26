@@ -1000,6 +1000,19 @@ class ApiClient:
         from backend.app.services.inventory_service import inventory_service
         return [s.model_dump() for s in inventory_service.list_stock(warehouse_id=warehouse_id, category=category, stock_status=stock_status)]
 
+    def update_stock_item(self, stock_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """Update stock item quantities, reorder thresholds, or unit costs with offline fallback."""
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/stock/{stock_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.put(url, json=updates)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.inventory_service import inventory_service
+        return inventory_service.update_stock_item(stock_id, updates).model_dump()
+
     def get_replenishment_alerts(self, warehouse_id: Optional[str] = None) -> List[Dict[str, Any]]:
         url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/inventory/alerts/replenishment"
         params = {"warehouse_id": warehouse_id} if warehouse_id else {}

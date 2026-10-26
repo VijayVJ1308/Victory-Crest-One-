@@ -404,6 +404,39 @@ class InventoryService:
             raise HTTPException(status_code=404, detail=f"Stock for SKU '{sku}' not found in warehouse '{warehouse_id}'")
         return WarehouseStockOut(**_STOCK_STORE[key])
 
+    def update_stock_item(self, stock_id: str, updates: Dict[str, Any]) -> WarehouseStockOut:
+        _seed_inventory_data()
+        item = _STOCK_STORE.get(stock_id)
+        if not item:
+            for k, s in _STOCK_STORE.items():
+                if s.get("id") == stock_id or k == stock_id:
+                    item = s
+                    break
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Stock item '{stock_id}' not found")
+
+        if "product_name" in updates and updates["product_name"]:
+            item["product_name"] = str(updates["product_name"]).strip()
+        if "category" in updates and updates["category"]:
+            item["category"] = str(updates["category"]).strip()
+        if "quantity_on_hand" in updates and updates["quantity_on_hand"] is not None:
+            qoh = to_decimal(updates["quantity_on_hand"])
+            item["quantity_on_hand"] = qoh
+            item["quantity_available"] = qoh - to_decimal(item.get("quantity_reserved", 0))
+        if "reorder_point" in updates and updates["reorder_point"] is not None:
+            item["reorder_point"] = to_decimal(updates["reorder_point"])
+        if "unit_cost" in updates and updates["unit_cost"] is not None:
+            item["unit_cost"] = to_decimal(updates["unit_cost"])
+
+        item["total_value"] = item["quantity_on_hand"] * item["unit_cost"]
+        if item["quantity_on_hand"] <= Decimal("0"):
+            item["stock_status"] = "OUT_OF_STOCK"
+        elif item["quantity_on_hand"] <= item["reorder_point"]:
+            item["stock_status"] = "LOW_STOCK"
+        else:
+            item["stock_status"] = "IN_STOCK"
+        return WarehouseStockOut(**item)
+
     def list_replenishment_alerts(self, warehouse_id: Optional[str] = None) -> List[StockReplenishmentAlert]:
         """Detect and return items where quantity_on_hand <= reorder_point."""
         _seed_inventory_data()

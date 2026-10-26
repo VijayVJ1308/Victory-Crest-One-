@@ -171,7 +171,12 @@ class ServiceManagementView(QWidget):
         filter_bar.addWidget(lbl_prio)
         filter_bar.addWidget(self.combo_ticket_priority)
         filter_bar.addWidget(self.txt_ticket_search)
-        filter_bar.addStretch()
+        btn_edit_ticket = QPushButton("✏️ Edit Ticket")
+        btn_edit_ticket.setProperty("class", "btn_secondary")
+        btn_edit_ticket.setToolTip("Edit selected support incident details, status, or resolution notes")
+        btn_edit_ticket.clicked.connect(self.edit_selected_ticket)
+        filter_bar.addWidget(btn_edit_ticket)
+
         layout.addLayout(filter_bar)
 
         # Tickets Table
@@ -192,6 +197,10 @@ class ServiceManagementView(QWidget):
         self.table_tickets.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table_tickets.doubleClicked.connect(self.on_ticket_double_clicked)
         layout.addWidget(self.table_tickets)
+
+        lbl_hint = QLabel("💡 Tip: Double-click any incident row (or click '✏️ Edit Ticket') to change status, priority, technician, or resolution notes.")
+        lbl_hint.setStyleSheet(f"color: {ThemeColors.TEXT_MUTED}; font-size: 11px; font-style: italic; margin-top: 4px;")
+        layout.addWidget(lbl_hint)
 
     # -------------------------------------------------------------------------
     # TAB 2: Field Work Orders & Dispatch
@@ -356,7 +365,7 @@ class ServiceManagementView(QWidget):
         # Update Telemetry Metrics
         m = self.cached_metrics
         self.card_active_tickets.findChild(QLabel, "metric_value").setText(str(m.get("active_tickets", 0)))
-        self.card_sla_compliance.findChild(QLabel, "metric_value").setText(f"{m.get('sla_compliance_rate', 100):.1f}%")
+        self.card_sla_compliance.findChild(QLabel, "metric_value").setText(f"{to_decimal(m.get('sla_compliance_rate', 100)):.1f}%")
         self.card_dispatched.findChild(QLabel, "metric_value").setText(str(m.get("dispatched_work_orders", 0)))
         self.card_completed_wo.findChild(QLabel, "metric_value").setText(str(m.get("completed_work_orders", 0)))
         self.card_service_revenue.findChild(QLabel, "metric_value").setText(f"₹{to_decimal(m.get('total_service_revenue', 0)):,.2f}")
@@ -934,19 +943,121 @@ class ServiceManagementView(QWidget):
 
         dialog.exec()
 
+    def edit_selected_ticket(self):
+        row = self.table_tickets.currentRow()
+        if row < 0 or row >= len(self.cached_tickets):
+            QMessageBox.information(self, "Selection Required", "Please select a ticket from the table to edit.")
+            return
+        t = self.cached_tickets[row]
+        self.open_edit_ticket_dialog(t)
+
     def on_ticket_double_clicked(self, index):
         row = index.row()
         if row < 0 or row >= len(self.cached_tickets):
             return
         t = self.cached_tickets[row]
-        QMessageBox.information(
-            self,
-            f"Ticket {t.get('ticket_number')}",
-            f"Customer: {t.get('customer_name')}\n"
-            f"Subject: {t.get('subject')}\n"
-            f"Category: {t.get('category')}\n"
-            f"Priority: {t.get('priority')} | Status: {t.get('status')}\n"
-            f"Assigned Tech: {t.get('assigned_to_name') or 'Unassigned'}\n\n"
-            f"Description:\n{t.get('description')}\n\n"
-            f"Resolution Notes:\n{t.get('resolution_notes') or 'Pending resolution'}"
-        )
+        self.open_edit_ticket_dialog(t)
+
+    def open_edit_ticket_dialog(self, t: Dict[str, Any]):
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"✏️ Edit Incident Ticket — {t.get('ticket_number')}")
+        dialog.resize(520, 500)
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(14)
+
+        hdr = QLabel(f"Edit Support Ticket: {t.get('ticket_number')}")
+        hdr.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {ThemeColors.TEXT_MAIN};")
+        layout.addWidget(hdr)
+
+        form = QFormLayout()
+        form.setSpacing(12)
+
+        lbl_num = QLabel(t.get("ticket_number", "N/A"))
+        lbl_num.setStyleSheet(f"font-weight: 700; color: {ThemeColors.PRIMARY}; font-size: 13px;")
+        form.addRow("Ticket #:", lbl_num)
+
+        txt_cust = QLineEdit(t.get("customer_name", ""))
+        form.addRow("Customer / Location*:", txt_cust)
+
+        txt_subj = QLineEdit(t.get("subject", ""))
+        form.addRow("Issue Subject*:", txt_subj)
+
+        combo_prio = QComboBox()
+        combo_prio.addItems(["CRITICAL", "URGENT", "HIGH", "MEDIUM", "LOW"])
+        curr_prio = t.get("priority", "MEDIUM").upper()
+        idx_prio = combo_prio.findText(curr_prio)
+        if idx_prio >= 0:
+            combo_prio.setCurrentIndex(idx_prio)
+        form.addRow("Priority Tier:", combo_prio)
+
+        combo_status = QComboBox()
+        combo_status.addItems(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"])
+        curr_status = t.get("status", "OPEN").upper()
+        idx_st = combo_status.findText(curr_status)
+        if idx_st >= 0:
+            combo_status.setCurrentIndex(idx_st)
+        form.addRow("Lifecycle Status:", combo_status)
+
+        txt_tech = QLineEdit(t.get("assigned_to_name", "") or "")
+        txt_tech.setPlaceholderText("Field Technician Name")
+        form.addRow("Assigned Technician:", txt_tech)
+
+        txt_desc = QTextEdit()
+        txt_desc.setText(t.get("description", ""))
+        txt_desc.setMaximumHeight(70)
+        form.addRow("Description:", txt_desc)
+
+        txt_reso = QTextEdit()
+        txt_reso.setText(t.get("resolution_notes", "") or "")
+        txt_reso.setPlaceholderText("Remediation actions taken, root cause analysis, and parts replaced...")
+        txt_reso.setMaximumHeight(70)
+        form.addRow("Resolution Notes:", txt_reso)
+
+        layout.addLayout(form)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+
+        btn_cancel = QPushButton("Cancel")
+        btn_cancel.setProperty("class", "btn_secondary")
+        btn_cancel.clicked.connect(dialog.reject)
+        btn_row.addWidget(btn_cancel)
+
+        btn_save = QPushButton("💾 Save Changes")
+        btn_save.setProperty("class", "btn_primary")
+
+        def save():
+            cust = txt_cust.text().strip()
+            subj = txt_subj.text().strip()
+            if not cust or not subj:
+                QMessageBox.warning(dialog, "Validation Error", "Customer and Subject are required fields.")
+                return
+
+            payload = {
+                "subject": subj,
+                "description": txt_desc.toPlainText().strip(),
+                "priority": combo_prio.currentText(),
+                "status": combo_status.currentText(),
+                "assigned_to_name": txt_tech.text().strip() or None,
+                "resolution_notes": txt_reso.toPlainText().strip() or None
+            }
+            ticket_id = t.get("id") or t.get("ticket_number")
+            try:
+                res = api_client.update_service_ticket(ticket_id, payload)
+                dialog.accept()
+                QMessageBox.information(
+                    self, "Ticket Updated",
+                    f"Successfully updated ticket '{res.get('ticket_number')}'.\n"
+                    f"Status: {res.get('status')} | Priority: {res.get('priority')}\n"
+                    f"Assigned: {res.get('assigned_to_name') or 'Unassigned'}"
+                )
+                self.refresh_data()
+            except Exception as e:
+                QMessageBox.critical(dialog, "Update Error", f"Failed to save ticket: {e}")
+
+        btn_save.clicked.connect(save)
+        btn_row.addWidget(btn_save)
+        layout.addLayout(btn_row)
+
+        dialog.exec()

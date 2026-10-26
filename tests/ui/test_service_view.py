@@ -33,6 +33,17 @@ def test_service_view_ticket_filtering(qapp):
     assert view.table_tickets.rowCount() <= initial_rows
 
 
+def test_service_view_edit_ticket(qapp, monkeypatch):
+    called = []
+    view = ServiceManagementView()
+    monkeypatch.setattr(view, "open_edit_ticket_dialog", lambda t: called.append(t))
+
+    view.table_tickets.selectRow(0)
+    view.edit_selected_ticket()
+    assert len(called) == 1
+    assert "ticket_number" in called[0]
+
+
 def test_main_window_service_navigation(qapp):
     window = MainWindow()
     assert "service" in window.nav_buttons

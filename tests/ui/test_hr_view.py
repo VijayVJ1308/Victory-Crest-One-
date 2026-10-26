@@ -31,6 +31,15 @@ def test_hr_view_employee_filtering(qapp):
     assert view.emp_table.rowCount() == initial_rows
 
 
+def test_hr_view_edit_employee(qapp, monkeypatch):
+    called = []
+    view = HrPayrollView()
+    monkeypatch.setattr(view, "open_edit_employee_dialog", lambda e: called.append(e))
+    view.on_employee_double_clicked(0, 0)
+    assert len(called) == 1
+    assert "employee_code" in called[0]
+
+
 def test_main_window_hr_and_payroll_navigation(qapp):
     window = MainWindow()
     assert "hr" in window.nav_buttons

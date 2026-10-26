@@ -3,7 +3,7 @@ Warehouses, Stock Catalog, Purchase Orders (ERP), Goods Receipt (GRN),
 Stock Transfers, Cycle Counts, and Valuation Metrics.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Query, Path, Body
 from backend.app.schemas.inventory import (
     WarehouseCreate, WarehouseOut,
@@ -65,6 +65,15 @@ def get_stock_item(
 ):
     """Get live inventory balance for a specific SKU in a given warehouse."""
     return inventory_service.get_stock_item(warehouse_id, sku)
+
+
+@router.put("/stock/{stock_id}", response_model=WarehouseStockOut)
+def update_stock_item(
+    stock_id: str = Path(..., description="Stock item ID or warehouse_sku key"),
+    updates: Dict[str, Any] = Body(..., description="Stock fields to update (product_name, category, quantity_on_hand, reorder_point, unit_cost)")
+):
+    """Update stock item quantities, reorder thresholds, or unit costs."""
+    return inventory_service.update_stock_item(stock_id, updates)
 
 
 @router.get("/alerts/replenishment", response_model=List[StockReplenishmentAlert])

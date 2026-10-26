@@ -210,6 +210,12 @@ class HrPayrollView(QWidget):
         btn_view_salary.clicked.connect(self.view_selected_employee_salary)
         ctrl_row.addWidget(btn_view_salary)
 
+        btn_edit_emp = QPushButton("✏️ Edit Employee")
+        btn_edit_emp.setProperty("class", "btn_secondary")
+        btn_edit_emp.setToolTip("Edit selected staff member details, salary, designation, or status")
+        btn_edit_emp.clicked.connect(self.edit_selected_employee)
+        ctrl_row.addWidget(btn_edit_emp)
+
         layout.addLayout(ctrl_row)
 
         self.emp_table = QTableWidget()
@@ -222,8 +228,14 @@ class HrPayrollView(QWidget):
         self.emp_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.emp_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.emp_table.setAlternatingRowColors(True)
+        self.emp_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.emp_table.cellDoubleClicked.connect(self.on_employee_double_clicked)
         self.emp_table.setStyleSheet(self._table_stylesheet())
         layout.addWidget(self.emp_table)
+
+        lbl_hint = QLabel("💡 Tip: Double-click any staff row (or select and click '✏️ Edit Employee') to modify name, designation, department, salary, or status.")
+        lbl_hint.setStyleSheet(f"color: {ThemeColors.TEXT_MUTED}; font-size: 11px; font-style: italic; margin-top: 4px;")
+        layout.addWidget(lbl_hint)
 
         return container
 
@@ -422,11 +434,14 @@ class HrPayrollView(QWidget):
     def refresh_data(self):
         # 1. Fetch Metrics
         metrics = api_client.get_hr_metrics()
+        att_rate = to_decimal(metrics.get('today_attendance_rate', 0))
+        payroll_cost = to_decimal(metrics.get('current_month_payroll_cost', 0))
+        net_disbursed = to_decimal(metrics.get('current_month_net_disbursed', 0))
         self.update_summary_card(self.kpi_headcount, f"{metrics.get('total_headcount', 0)} Staff")
-        self.update_summary_card(self.kpi_attendance, f"{metrics.get('today_attendance_rate', 0):,.2f} %")
-        self.update_summary_card(self.kpi_payroll_cost, f"₹{metrics.get('current_month_payroll_cost', 0):,.2f}")
+        self.update_summary_card(self.kpi_attendance, f"{att_rate:,.2f} %")
+        self.update_summary_card(self.kpi_payroll_cost, f"₹{payroll_cost:,.2f}")
         self.update_summary_card(self.kpi_pending_leaves, f"{metrics.get('pending_leaves_count', 0)} Requests")
-        self.update_summary_card(self.kpi_net_disbursed, f"₹{metrics.get('current_month_net_disbursed', 0):,.2f}")
+        self.update_summary_card(self.kpi_net_disbursed, f"₹{net_disbursed:,.2f}")
 
         # 2. Fetch Employees
         self.cached_employees = api_client.get_employees()
@@ -1155,6 +1170,139 @@ class HrPayrollView(QWidget):
         btn_close.setProperty("class", "btn_secondary")
         btn_close.clicked.connect(dialog.accept)
         layout.addWidget(btn_close)
+
+        dialog.exec()
+
+    # ---------------------------------------------------------
+    # Staff Profile Editing
+    # ---------------------------------------------------------
+    def on_employee_double_clicked(self, row: int, column: int):
+        item_code = self.emp_table.item(row, 0)
+        if not item_code:
+            return
+        emp_data = item_code.data(Qt.UserRole)
+        if emp_data:
+            self.open_edit_employee_dialog(emp_data)
+
+    def edit_selected_employee(self):
+        row = self.emp_table.currentRow()
+        if row < 0:
+            QMessageBox.information(self, "Selection Required", "Please select an employee row from the table to edit.")
+            return
+        item_code = self.emp_table.item(row, 0)
+        if not item_code:
+            return
+        emp_data = item_code.data(Qt.UserRole)
+        if emp_data:
+            self.open_edit_employee_dialog(emp_data)
+
+    def open_edit_employee_dialog(self, emp_data: Dict[str, Any]):
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"✏️ Edit Staff Profile — {emp_data.get('employee_code')}")
+        dialog.setMinimumWidth(500)
+
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(14)
+
+        hdr = QLabel(f"Edit Employee Record: {emp_data.get('employee_code')}")
+        hdr.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {ThemeColors.TEXT_MAIN};")
+        layout.addWidget(hdr)
+
+        form = QFormLayout()
+        form.setSpacing(12)
+
+        lbl_code = QLabel(emp_data.get("employee_code", "N/A"))
+        lbl_code.setStyleSheet(f"font-weight: 700; color: {ThemeColors.PRIMARY}; font-size: 13px;")
+        form.addRow("Staff Code:", lbl_code)
+
+        txt_name = QLineEdit(emp_data.get("full_name", ""))
+        form.addRow("Full Legal Name*:", txt_name)
+
+        txt_dept = QLineEdit(emp_data.get("department_name", "General Operations"))
+        form.addRow("Department*:", txt_dept)
+
+        txt_desig = QLineEdit(emp_data.get("designation", "Staff"))
+        form.addRow("Designation*:", txt_desig)
+
+        combo_type = QComboBox()
+        combo_type.addItems(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERN"])
+        curr_type = emp_data.get("employment_type", "FULL_TIME")
+        idx_type = combo_type.findText(curr_type)
+        if idx_type >= 0:
+            combo_type.setCurrentIndex(idx_type)
+        form.addRow("Employment Type:", combo_type)
+
+        spin_sal = QDoubleSpinBox()
+        spin_sal.setRange(0, 10000000)
+        spin_sal.setDecimals(2)
+        spin_sal.setPrefix("₹ ")
+        spin_sal.setValue(float(to_decimal(emp_data.get("base_salary", 0))))
+        form.addRow("Monthly Base Salary (₹):", spin_sal)
+
+        txt_phone = QLineEdit(emp_data.get("phone", "") or "")
+        form.addRow("Phone Number:", txt_phone)
+
+        txt_email = QLineEdit(emp_data.get("email", "") or "")
+        form.addRow("Work Email:", txt_email)
+
+        combo_status = QComboBox()
+        combo_status.addItems(["ACTIVE", "ON_LEAVE", "PROBATION", "TERMINATED"])
+        curr_st = emp_data.get("status", "ACTIVE")
+        idx_st = combo_status.findText(curr_st)
+        if idx_st >= 0:
+            combo_status.setCurrentIndex(idx_st)
+        form.addRow("Employment Status:", combo_status)
+
+        layout.addLayout(form)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+
+        btn_cancel = QPushButton("Cancel")
+        btn_cancel.setProperty("class", "btn_secondary")
+        btn_cancel.clicked.connect(dialog.reject)
+        btn_row.addWidget(btn_cancel)
+
+        btn_save = QPushButton("💾 Save Changes")
+        btn_save.setProperty("class", "btn_primary")
+
+        def save():
+            name = txt_name.text().strip()
+            dept = txt_dept.text().strip()
+            desig = txt_desig.text().strip()
+            if not name:
+                QMessageBox.warning(dialog, "Validation Error", "Full Name cannot be empty.")
+                return
+
+            payload = {
+                "full_name": name,
+                "department_name": dept or "General Operations",
+                "designation": desig or "Staff",
+                "employment_type": combo_type.currentText(),
+                "base_salary": float(spin_sal.value()),
+                "phone": txt_phone.text().strip() or None,
+                "email": txt_email.text().strip() or None,
+                "status": combo_status.currentText()
+            }
+            emp_id = emp_data.get("id") or emp_data.get("employee_code")
+            try:
+                res = api_client.update_employee(emp_id, payload)
+                dialog.accept()
+                QMessageBox.information(
+                    self, "Employee Updated",
+                    f"Successfully updated staff record for '{res.get('full_name')}'.\n"
+                    f"Designation: {res.get('designation')} ({res.get('department_name')})\n"
+                    f"Base Salary: ₹{float(to_decimal(res.get('base_salary', 0))):,.2f}\n"
+                    f"Status: {res.get('status')}"
+                )
+                self.refresh_data()
+            except Exception as e:
+                QMessageBox.critical(dialog, "Update Error", f"Failed to save employee profile: {e}")
+
+        btn_save.clicked.connect(save)
+        btn_row.addWidget(btn_save)
+        layout.addLayout(btn_row)
 
         dialog.exec()
 

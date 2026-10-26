@@ -72,6 +72,23 @@ def test_stock_catalog_and_filtering():
     assert Decimal(str(item["quantity_on_hand"])) > 0
 
 
+def test_update_stock_item():
+    # Update quantity and unit cost of an existing stock item
+    payload = {
+        "product_name": "Premium Madurai Degree Filter Coffee",
+        "quantity_on_hand": 180.0,
+        "unit_cost": 70.0,
+        "reorder_point": 40.0
+    }
+    res = client.put("/api/v1/inventory/stock/wh_mdu_fnb_FNB-COF-MADURAI", json=payload)
+    assert res.status_code == 200
+    updated = res.json()
+    assert updated["product_name"] == "Premium Madurai Degree Filter Coffee"
+    assert Decimal(str(updated["quantity_on_hand"])) == Decimal("180.0")
+    assert Decimal(str(updated["unit_cost"])) == Decimal("70.0")
+    assert Decimal(str(updated["total_value"])) == Decimal("12600.0")
+
+
 def test_stock_replenishment_alerts():
     res = client.get("/api/v1/inventory/alerts/replenishment")
     assert res.status_code == 200
