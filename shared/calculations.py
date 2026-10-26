@@ -5,6 +5,7 @@ Decimal-safe and zero-division-protected calculation functions for KPIs, hospita
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Union, Optional, Dict, List, Any, Tuple
 from datetime import datetime, timezone
+import math
 
 Number = Union[int, float, Decimal]
 
@@ -2232,5 +2233,273 @@ def calculate_lakehouse_metrics(
         "deployed_ml_models_count": deployed_models,
         "avg_model_accuracy_percent": avg_accuracy
     }
+
+
+# ============================================================================
+# Phase 19: Zero-Trust Security & Compliance Auditor
+# ============================================================================
+
+def calculate_compliance_score(checks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Calculate compliance audit metrics and readiness rating.
+    Framework scores: Weighted compliance percentage (COMPLIANT=100%, WARNING=50%, NON_COMPLIANT=0%, MANUAL_REVIEW=50%).
+    Returns:
+        total_checks, compliant_count, warning_count, non_compliant_count, manual_review_count,
+        overall_compliance_percent, framework_scores, posture_rating
+    """
+    total = len(checks)
+    if total == 0:
+        return {
+            "total_checks": 0,
+            "compliant_count": 0,
+            "warning_count": 0,
+            "non_compliant_count": 0,
+            "manual_review_count": 0,
+            "overall_compliance_percent": Decimal("100.00"),
+            "framework_scores": {},
+            "posture_rating": "AUDIT_READY_EXCELLENT"
+        }
+
+    compliant = 0
+    warning = 0
+    non_compliant = 0
+    manual_review = 0
+
+    framework_data: Dict[str, Dict[str, int]] = {}
+
+    for c in checks:
+        status = str(c.get("status", "")).upper()
+        fw = str(c.get("framework", "GENERAL")).upper()
+
+        if fw not in framework_data:
+            framework_data[fw] = {"total": 0, "compliant": 0, "warning": 0, "non_compliant": 0}
+
+        framework_data[fw]["total"] += 1
+
+        if status == "COMPLIANT":
+            compliant += 1
+            framework_data[fw]["compliant"] += 1
+        elif status == "WARNING":
+            warning += 1
+            framework_data[fw]["warning"] += 1
+        elif status == "NON_COMPLIANT":
+            non_compliant += 1
+            framework_data[fw]["non_compliant"] += 1
+        elif status == "MANUAL_REVIEW":
+            manual_review += 1
+        else:
+            non_compliant += 1
+            framework_data[fw]["non_compliant"] += 1
+
+    # Weighted score: COMPLIANT + 0.5 * WARNING + 0.5 * MANUAL_REVIEW
+    weighted_score = Decimal(str(compliant)) + (Decimal("0.5") * Decimal(str(warning))) + (Decimal("0.5") * Decimal(str(manual_review)))
+    overall_pct = ((weighted_score / Decimal(str(total))) * Decimal("100.00")).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+
+    framework_scores: Dict[str, Decimal] = {}
+    for fw, counts in framework_data.items():
+        fw_tot = counts["total"]
+        if fw_tot > 0:
+            fw_pts = Decimal(str(counts["compliant"])) + (Decimal("0.5") * Decimal(str(counts["warning"])))
+            fw_pct = ((fw_pts / Decimal(str(fw_tot))) * Decimal("100.00")).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+        else:
+            fw_pct = Decimal("100.00")
+        framework_scores[fw] = fw_pct
+
+    if overall_pct >= Decimal("90.00"):
+        posture_rating = "AUDIT_READY_EXCELLENT"
+    elif overall_pct >= Decimal("75.00"):
+        posture_rating = "PASSING_ACCEPTABLE"
+    elif overall_pct >= Decimal("60.00"):
+        posture_rating = "ELEVATED_RISK"
+    else:
+        posture_rating = "CRITICAL_NON_COMPLIANT"
+
+    return {
+        "total_checks": total,
+        "compliant_count": compliant,
+        "warning_count": warning,
+        "non_compliant_count": non_compliant,
+        "manual_review_count": manual_review,
+        "overall_compliance_percent": overall_pct,
+        "framework_scores": framework_scores,
+        "posture_rating": posture_rating
+    }
+
+
+def evaluate_threat_risk_score(
+    severity: str,
+    event_count: int = 1,
+    failed_attempts: int = 0,
+    is_privileged_account: bool = False
+) -> Tuple[Decimal, str]:
+    """
+    Evaluate multi-factor zero-trust threat risk score (0.0 to 100.0) and tier classification.
+    Returns: (risk_score, risk_tier)
+    Risk tiers: LOW (<35.0), ELEVATED (35.0-59.99), HIGH (60.0-79.99), CRITICAL (>=80.0).
+    """
+    sev = str(severity).upper()
+    if sev == "CRITICAL":
+        base = Decimal("50.0")
+    elif sev == "HIGH":
+        base = Decimal("35.0")
+    elif sev == "MEDIUM":
+        base = Decimal("20.0")
+    elif sev == "LOW":
+        base = Decimal("10.0")
+    else:
+        base = Decimal("5.0")
+
+    ev_count = max(0, int(event_count))
+    event_add = min(Decimal("25.0"), Decimal(str(ev_count)) * Decimal("2.5"))
+
+    fails = max(0, int(failed_attempts))
+    fail_add = min(Decimal("20.0"), Decimal(str(fails)) * Decimal("4.0"))
+
+    priv_add = Decimal("15.0") if is_privileged_account else Decimal("0.0")
+
+    total = min(Decimal("100.00"), base + event_add + fail_add + priv_add)
+    final_score = total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if final_score >= Decimal("80.00"):
+        tier = "CRITICAL"
+    elif final_score >= Decimal("60.00"):
+        tier = "HIGH"
+    elif final_score >= Decimal("35.00"):
+        tier = "ELEVATED"
+    else:
+        tier = "LOW"
+
+    return final_score, tier
+
+
+def evaluate_credential_entropy(
+    password_length: int,
+    has_symbols: bool = True,
+    has_numbers: bool = True,
+    has_mixed_case: bool = True
+) -> Dict[str, Any]:
+    """
+    Calculate Shannon information entropy (in bits) for credentials and evaluate Zero-Trust compliance.
+    Entropy = L * log2(R) where L is length and R is pool size.
+    Zero-Trust standard: >= 60 bits and length >= 12.
+    """
+    p_len = max(0, int(password_length))
+    pool_size = 0
+
+    if p_len > 0:
+        pool_size += 52 if has_mixed_case else 26
+        if has_numbers:
+            pool_size += 10
+        if has_symbols:
+            pool_size += 32
+
+    if p_len == 0 or pool_size <= 0:
+        bits = Decimal("0.00")
+    else:
+        raw_bits = float(p_len) * math.log2(float(pool_size))
+        bits = Decimal(str(raw_bits)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if bits >= Decimal("80.00"):
+        rating = "MILITARY_GRADE"
+    elif bits >= Decimal("60.00"):
+        rating = "STRONG_ZERO_TRUST"
+    elif bits >= Decimal("40.00"):
+        rating = "MODERATE"
+    else:
+        rating = "WEAK_VULNERABLE"
+
+    is_compliant = (bits >= Decimal("60.00")) and (p_len >= 12)
+
+    return {
+        "password_length": p_len,
+        "pool_size": pool_size,
+        "entropy_bits": bits,
+        "strength_rating": rating,
+        "is_zero_trust_compliant": is_compliant
+    }
+
+
+def calculate_security_posture_metrics(
+    compliance_checks: List[Dict[str, Any]],
+    incidents: List[Dict[str, Any]],
+    quarantined: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Calculate consolidated enterprise security posture metrics, deducting points for
+    unresolved incidents and active quarantine containment events.
+    """
+    comp_res = calculate_compliance_score(compliance_checks)
+    base_score = comp_res["overall_compliance_percent"]
+
+    # Analyze incidents
+    open_incidents = 0
+    critical_threats = 0
+    high_threats = 0
+    medium_threats = 0
+
+    for inc in incidents:
+        st = str(inc.get("status", "")).upper()
+        is_resolved = inc.get("is_resolved", False)
+        if is_resolved or st == "RESOLVED":
+            continue
+
+        open_incidents += 1
+        sev = str(inc.get("severity", "")).upper()
+        if sev == "CRITICAL":
+            critical_threats += 1
+        elif sev == "HIGH":
+            high_threats += 1
+        elif sev == "MEDIUM":
+            medium_threats += 1
+
+    # Active quarantined entities
+    active_quarantined = 0
+    for q in quarantined:
+        st = str(q.get("status", "")).upper()
+        is_act = q.get("is_active", True)
+        if is_act and st != "RELEASED":
+            active_quarantined += 1
+
+    # Penalty deductions
+    penalties = (
+        Decimal(str(critical_threats)) * Decimal("5.0")
+        + Decimal(str(high_threats)) * Decimal("2.0")
+        + Decimal(str(medium_threats)) * Decimal("1.0")
+    )
+    penalties = min(Decimal("40.00"), penalties)
+
+    posture_score = max(Decimal("0.00"), min(Decimal("100.00"), base_score - penalties)).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+
+    if posture_score >= Decimal("90.00"):
+        grade = "A - ZERO_TRUST_HARDENED"
+    elif posture_score >= Decimal("80.00"):
+        grade = "B - COMPLIANT_STABLE"
+    elif posture_score >= Decimal("70.00"):
+        grade = "C - DEFICIENCIES_DETECTED"
+    elif posture_score >= Decimal("60.00"):
+        grade = "D - ELEVATED_VULNERABILITY"
+    else:
+        grade = "F - CRITICAL_EXPOSURE"
+
+    return {
+        "enterprise_posture_score": posture_score,
+        "posture_grade": grade,
+        "overall_compliance_percent": base_score,
+        "compliance_rating": comp_res["posture_rating"],
+        "total_controls_audited": comp_res["total_checks"],
+        "failing_controls_count": comp_res["non_compliant_count"],
+        "warning_controls_count": comp_res["warning_count"],
+        "open_incidents_count": open_incidents,
+        "critical_threats_count": critical_threats,
+        "quarantined_actors_count": active_quarantined,
+        "framework_scores": comp_res["framework_scores"]
+    }
+
 
 

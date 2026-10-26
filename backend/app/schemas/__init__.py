@@ -132,6 +132,24 @@ from backend.app.schemas.lakehouse import (
     MlInferenceResponse,
     LakehouseMetricsOut
 )
+from backend.app.schemas.security import (
+    SecurityComplianceCheckBase,
+    SecurityComplianceCheckCreate,
+    SecurityComplianceCheckOut,
+    ComplianceScanRequest,
+    ComplianceScanResponse,
+    SecurityIncidentBase,
+    SecurityIncidentCreate,
+    IncidentResolutionRequest,
+    SecurityIncidentOut,
+    QuarantineRequest,
+    QuarantinedEntityOut,
+    ThreatEvaluationRequest,
+    ThreatEvaluationResponse,
+    CredentialEntropyRequest,
+    CredentialEntropyResponse,
+    SecurityPostureMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -343,7 +361,23 @@ __all__ = [
     "MlModelOut",
     "MlInferenceRequest",
     "MlInferenceResponse",
-    "LakehouseMetricsOut"
+    "LakehouseMetricsOut",
+    "SecurityComplianceCheckBase",
+    "SecurityComplianceCheckCreate",
+    "SecurityComplianceCheckOut",
+    "ComplianceScanRequest",
+    "ComplianceScanResponse",
+    "SecurityIncidentBase",
+    "SecurityIncidentCreate",
+    "IncidentResolutionRequest",
+    "SecurityIncidentOut",
+    "QuarantineRequest",
+    "QuarantinedEntityOut",
+    "ThreatEvaluationRequest",
+    "ThreatEvaluationResponse",
+    "CredentialEntropyRequest",
+    "CredentialEntropyResponse",
+    "SecurityPostureMetricsOut"
 ]
 
 

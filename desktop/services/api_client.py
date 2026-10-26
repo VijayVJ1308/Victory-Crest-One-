@@ -2942,6 +2942,227 @@ class ApiClient:
             "avg_model_accuracy_percent": str(metrics["avg_model_accuracy_percent"])
         }
 
+    # ---------------------------------------------------------
+    # Zero-Trust Security & Compliance Auditor
+    # ---------------------------------------------------------
+    def get_security_compliance_checks(
+        self,
+        property_id: Optional[str] = None,
+        framework: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/compliance/checks"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if framework:
+            params["framework"] = framework
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        return [c.model_dump() for c in security_service.get_compliance_checks(property_id=property_id, framework=framework)]
+
+    def run_security_compliance_scan(
+        self,
+        framework: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/compliance/scan"
+        body = {}
+        if framework:
+            body["framework"] = framework
+        if property_id:
+            body["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import ComplianceScanRequest
+        return security_service.run_compliance_scan(ComplianceScanRequest(**body)).model_dump()
+
+    def get_security_incidents(
+        self,
+        property_id: Optional[str] = None,
+        status: Optional[str] = None,
+        severity: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/incidents"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if status:
+            params["status"] = status
+        if severity:
+            params["severity"] = severity
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        return [i.model_dump() for i in security_service.get_incidents(property_id=property_id, status_filter=status, severity=severity)]
+
+    def create_security_incident(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/incidents"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import SecurityIncidentCreate
+        return security_service.create_incident(SecurityIncidentCreate(**data)).model_dump()
+
+    def resolve_security_incident(
+        self,
+        incident_id: str,
+        resolution_notes: str,
+        remediation_action: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/incidents/{incident_id}/resolve"
+        body = {"resolution_notes": resolution_notes}
+        if remediation_action:
+            body["remediation_action"] = remediation_action
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import IncidentResolutionRequest
+        return security_service.resolve_incident(incident_id, IncidentResolutionRequest(**body)).model_dump()
+
+    def get_quarantined_entities(self, is_active: Optional[bool] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/quarantine"
+        params = {}
+        if is_active is not None:
+            params["is_active"] = str(is_active).lower()
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        return [q.model_dump() for q in security_service.get_quarantined_entities(is_active=is_active)]
+
+    def quarantine_entity(
+        self,
+        entity_id_or_ip: str,
+        reason: str,
+        entity_type: str = "IP_ADDRESS",
+        incident_event_code: Optional[str] = None,
+        quarantined_by: str = "SECURITY_OFFICER"
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/quarantine"
+        body = {
+            "entity_id_or_ip": entity_id_or_ip,
+            "reason": reason,
+            "entity_type": entity_type,
+            "incident_event_code": incident_event_code,
+            "quarantined_by": quarantined_by
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import QuarantineRequest
+        return security_service.quarantine_entity(QuarantineRequest(**body)).model_dump()
+
+    def release_quarantined_entity(self, quarantine_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/quarantine/{quarantine_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.delete(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        return security_service.release_quarantined_entity(quarantine_id).model_dump()
+
+    def evaluate_threat(
+        self,
+        severity: str,
+        event_count: int = 1,
+        failed_attempts: int = 0,
+        is_privileged: bool = False
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/threat/evaluate"
+        body = {
+            "severity": severity,
+            "event_count": event_count,
+            "failed_attempts": failed_attempts,
+            "is_privileged_account": is_privileged
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import ThreatEvaluationRequest
+        return security_service.evaluate_threat(ThreatEvaluationRequest(**body)).model_dump()
+
+    def evaluate_credential_entropy(
+        self,
+        length: int,
+        has_symbols: bool = True,
+        has_numbers: bool = True,
+        has_mixed_case: bool = True
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/credentials/entropy"
+        body = {
+            "password_length": length,
+            "has_symbols": has_symbols,
+            "has_numbers": has_numbers,
+            "has_mixed_case": has_mixed_case
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        from backend.app.schemas.security import CredentialEntropyRequest
+        return security_service.evaluate_entropy(CredentialEntropyRequest(**body)).model_dump()
+
+    def get_security_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/security/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.security_service import security_service
+        return security_service.get_posture_metrics(property_id=property_id).model_dump()
+
 
 api_client = ApiClient()
 

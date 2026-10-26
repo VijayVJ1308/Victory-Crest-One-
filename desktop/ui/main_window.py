@@ -37,6 +37,7 @@ from desktop.ui.views.automation_view import WorkflowAutomationView
 from desktop.ui.views.ai_assistant_view import AiAssistantView
 from desktop.ui.views.iot_view import IoTGatewaysView
 from desktop.ui.views.lakehouse_view import LakehouseView
+from desktop.ui.views.security_view import SecurityGovernanceView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -105,6 +106,7 @@ class MainWindow(QMainWindow):
         self.ai_assistant_view = AiAssistantView()
         self.iot_view = IoTGatewaysView()
         self.lakehouse_view = LakehouseView()
+        self.security_view = SecurityGovernanceView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -127,6 +129,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.ai_assistant_view)       # index 18: ai business assistant
         self.view_stack.addWidget(self.iot_view)                # index 19: iot & smart device gateways
         self.view_stack.addWidget(self.lakehouse_view)          # index 20: data lakehouse & predictive ml
+        self.view_stack.addWidget(self.security_view)           # index 21: zero-trust security & compliance auditor
 
 
         content_layout.addWidget(self.view_stack)
@@ -176,6 +179,7 @@ class MainWindow(QMainWindow):
                 ("ai_assistant", "🤖  AI Assistant", "active"),
                 ("iot_gateways", "📡  IoT & Smart Devices", "active"),
                 ("analytics_lake", "🔮  Data Lakehouse & ML", "active"),
+                ("cybersecurity_governance", "🛡️  Security & Compliance", "active"),
             ]),
             ("SALES & REVENUE", [
                 ("sales", "💼  Sales & CRM", "active"),
@@ -355,6 +359,8 @@ class MainWindow(QMainWindow):
             self.iot_view.refresh_data()
         if hasattr(self, "lakehouse_view"):
             self.lakehouse_view.refresh_data()
+        if hasattr(self, "security_view"):
+            self.security_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -530,6 +536,9 @@ class MainWindow(QMainWindow):
         elif key == "analytics_lake":
             self.lakehouse_view.refresh_data()
             self.view_stack.setCurrentIndex(20)
+        elif key in ("cybersecurity_governance", "security"):
+            self.security_view.refresh_data()
+            self.view_stack.setCurrentIndex(21)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

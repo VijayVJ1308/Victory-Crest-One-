@@ -215,8 +215,18 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🛡️",
         "description": "Continuous automated audit posture, zero-trust cryptographic verification, and security governance.",
         "phase": 19,
+        "status": "active"
+    },
+    {
+        "id": "multi_cloud_dr",
+        "name": "Multi-Cloud Resiliency & Autonomous DR",
+        "category": CATEGORY_CORE,
+        "icon": "🌐",
+        "description": "Continuous cross-cloud standby replication, automated failover drills, and zero-RPO disaster recovery.",
+        "phase": 20,
         "status": "planned"
     },
+
 
     {
         "id": "documents",

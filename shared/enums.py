@@ -29,6 +29,7 @@ class ModuleType(str, Enum):
     AI_ASSISTANT = "ai_assistant"
     IOT_GATEWAYS = "iot_gateways"
     ANALYTICS_LAKE = "analytics_lake"
+    CYBERSECURITY_GOVERNANCE = "cybersecurity_governance"
     SETTINGS = "settings"
 
 
@@ -769,6 +770,49 @@ class DatasetFormat(str, Enum):
     PARQUET = "PARQUET"
     CSV = "CSV"
     DELTA = "DELTA"
+
+
+# ============================================================================
+# Phase 19: Zero-Trust Security & Compliance Auditor
+# ============================================================================
+
+class ComplianceFramework(str, Enum):
+    SOC2_TYPE_II = "SOC2_TYPE_II"
+    ISO_27001 = "ISO_27001"
+    GDPR_PRIVACY = "GDPR_PRIVACY"
+    PCI_DSS_V4 = "PCI_DSS_V4"
+    HIPAA_SECURITY = "HIPAA_SECURITY"
+
+
+class SecurityCheckStatus(str, Enum):
+    COMPLIANT = "COMPLIANT"
+    NON_COMPLIANT = "NON_COMPLIANT"
+    WARNING = "WARNING"
+    MANUAL_REVIEW = "MANUAL_REVIEW"
+
+
+class SecurityThreatSeverity(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class SecurityEventType(str, Enum):
+    PRIVILEGE_ESCALATION_ATTEMPT = "PRIVILEGE_ESCALATION_ATTEMPT"
+    UNAUTHORIZED_RESOURCE_ACCESS = "UNAUTHORIZED_RESOURCE_ACCESS"
+    SESSION_ANOMALY = "SESSION_ANOMALY"
+    BRUTE_FORCE_BURST = "BRUTE_FORCE_BURST"
+    DATA_EXFILTRATION_PATTERN = "DATA_EXFILTRATION_PATTERN"
+    UNENCRYPTED_PII_EXPOSURE = "UNENCRYPTED_PII_EXPOSURE"
+
+
+class SecurityRemediationAction(str, Enum):
+    QUARANTINE_IP = "QUARANTINE_IP"
+    REVOKE_USER_SESSION = "REVOKE_USER_SESSION"
+    LOCK_USER_ACCOUNT = "LOCK_USER_ACCOUNT"
+    FORCE_MFA_CHALLENGE = "FORCE_MFA_CHALLENGE"
+    LOG_AND_FLAG = "LOG_AND_FLAG"
 
 
 

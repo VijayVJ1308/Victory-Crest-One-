@@ -113,6 +113,11 @@ from backend.app.models.lakehouse import (
     DataPipelineJob,
     MlModelRegistry
 )
+from backend.app.models.security import (
+    SecurityComplianceCheck,
+    SecurityIncidentEvent,
+    QuarantinedEntity
+)
 
 __all__ = [
     "Base",
@@ -198,6 +203,9 @@ __all__ = [
     "IoTTelemetryReading",
     "LakeDataset",
     "DataPipelineJob",
-    "MlModelRegistry"
+    "MlModelRegistry",
+    "SecurityComplianceCheck",
+    "SecurityIncidentEvent",
+    "QuarantinedEntity"
 ]
 
