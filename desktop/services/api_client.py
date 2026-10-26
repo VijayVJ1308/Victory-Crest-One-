@@ -2244,6 +2244,176 @@ class ApiClient:
         ).model_dump()
 
 
+    # -------------------------------------------------------------
+    # Business Intelligence & Executive Analytics
+    # -------------------------------------------------------------
+    def get_bi_dashboard(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/dashboard"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return bi_service.get_dashboard_data(
+            organization_id=organization_id,
+            property_id=property_id
+        ).model_dump()
+
+    def get_bi_telemetry(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/telemetry"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return bi_service.get_dashboard_data(
+            organization_id=organization_id,
+            property_id=property_id
+        ).telemetry.model_dump()
+
+    def get_bi_ratios(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/ratios"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return bi_service.get_dashboard_data(
+            organization_id=organization_id,
+            property_id=property_id
+        ).financial_ratios.model_dump()
+
+    def get_bi_departments(
+        self,
+        organization_id: Optional[str] = None,
+        property_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/departments"
+        params = {}
+        if organization_id:
+            params["organization_id"] = organization_id
+        if property_id:
+            params["property_id"] = property_id
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return [d.model_dump() for d in bi_service.get_dashboard_data(
+            organization_id=organization_id,
+            property_id=property_id
+        ).department_contributions]
+
+    def get_bi_properties(
+        self,
+        organization_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/properties"
+        params = {"organization_id": organization_id} if organization_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return [p.model_dump() for p in bi_service.get_dashboard_data(
+            organization_id=organization_id
+        ).properties_benchmark]
+
+    def generate_bi_report(
+        self,
+        request_data: Dict[str, Any],
+        organization_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/reports/generate"
+        params = {"organization_id": organization_id} if organization_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=request_data, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        from backend.app.schemas.bi import BiReportGenerateRequest
+        req = BiReportGenerateRequest(**request_data)
+        meta, _, _, _ = bi_service.generate_report(req, organization_id=organization_id)
+        return meta.model_dump()
+
+    def get_bi_report_history(
+        self,
+        organization_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/reports/history"
+        params = {"organization_id": organization_id} if organization_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return [r.model_dump() for r in bi_service.list_reports(organization_id=organization_id)]
+
+    def download_bi_report(self, report_id: str) -> Optional[Tuple[bytes, str, str]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/bi/reports/download/{report_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    content_disp = res.headers.get("content-disposition", "")
+                    filename = "report_export"
+                    if "filename=" in content_disp:
+                        filename = content_disp.split("filename=")[-1].strip('"')
+                    return res.content, res.headers.get("content-type", "application/octet-stream"), filename
+        except Exception:
+            pass
+        from backend.app.services.bi_service import bi_service
+        return bi_service.get_report_file(report_id)
+
+
 api_client = ApiClient()
 
 

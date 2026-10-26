@@ -196,6 +196,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 11: Hospitality & Resort PMS / Restaurant Dining Management** (Multi-property room rack & availability grid, room types, dynamic rate plans, reservations engine, express check-in/out, running guest folios with incidental postings, housekeeping room status transitions, restaurant dining tables floorplan, Kitchen Display System (KDS) order lifecycle, room folio transfer billing, and automated Finance GL night audit revenue recognition: DR 1020, CR 4010, CR 2020)
 - [x] **Phase 12: Manufacturing & Production Orders / Bill of Materials (BOM)** (Manufacturing work centers, multi-level Bills of Materials with scrap allowance, routing labor & machine steps, production orders with live state transitions, quality inspection checkpoints, WIP valuation, and automated double-entry GL inventory absorption: DR 1230 Finished Goods Inventory, CR 1210 Raw Materials Inventory, CR 5030 Manufacturing Direct Labor & Overhead)
 - [x] **Phase 13: Project Management & Professional Services (PSA)** (Work Breakdown Structures (WBS), project portfolios, task hierarchies, contract milestone deliverable schedules, billable and non-billable labor timesheets, direct project expenses, budget variance & burn rate analytics, and automated double-entry GL revenue recognition: DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue, CR 2020 GST Output Tax Payable 18%)
+- [x] **Phase 14: Business Intelligence & Executive Analytics** (Multi-dimensional executive KPI dashboards, Gross Operating Profit (GOP), EBITDA, departmental P&L contribution, physical property benchmarking, financial health ratios, linear predictive revenue forecasting, and high-fidelity multi-format document exports in Excel `.xlsx`, PDF with ReportLab corporate dossier formatting, and RFC-4180 CSV)
 
 ---
 
@@ -207,19 +208,19 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**200 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, and project PSA budget/burn rate calculations
+**216 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, project PSA budget/burn rate, and BI financial ratios / forecasting calculations
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, and Project Management / PSA
-- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 15)
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, Project Management / PSA, and Business Intelligence / Document Exports
+- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 16)
 
 ---
 
-## 📅 Next Phase: Phase 14 — Business Intelligence & Executive Analytics
-- Multi-dimensional executive KPI dashboards, revenue run-rates, and department cost center telemetry
-- Financial ratios, Gross Operating Profit (GOP), EBITDA, and portfolio profitability analysis
-- Interactive visual analytics, trend forecasting, and cohort retention metrics
-- Automated scheduled reporting & high-fidelity document exports (Excel `.xlsx`, formatted PDF reports via ReportLab, and CSV data extracts)
+## 📅 Next Phase: Phase 15 — Workflow Automation & Event Rules Engine
+- Event triggers (state changes, cron timers, thresholds, inbound webhooks)
+- Rule condition evaluator and multi-step automated execution pipelines
+- Cross-module event bus (e.g. low stock triggers PO requisition, customer VIP status triggers concierge notification)
+- Desktop automation builder view with execution logs and workflow diagnostics
 
 
 

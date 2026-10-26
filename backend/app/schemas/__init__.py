@@ -84,6 +84,16 @@ from backend.app.schemas.project import (
     MilestoneInvoiceRequest, MilestoneInvoiceResponse,
     ProjectMetricsOut
 )
+from backend.app.schemas.bi import (
+    ExecutiveKpiTelemetry,
+    MonthlyTrendPoint,
+    PropertyPerformanceSummary,
+    DepartmentContribution,
+    FinancialRatiosOut,
+    BiDashboardData,
+    BiReportGenerateRequest,
+    BiReportOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -257,7 +267,15 @@ __all__ = [
     "ProjectOut",
     "MilestoneInvoiceRequest",
     "MilestoneInvoiceResponse",
-    "ProjectMetricsOut"
+    "ProjectMetricsOut",
+    "ExecutiveKpiTelemetry",
+    "MonthlyTrendPoint",
+    "PropertyPerformanceSummary",
+    "DepartmentContribution",
+    "FinancialRatiosOut",
+    "BiDashboardData",
+    "BiReportGenerateRequest",
+    "BiReportOut"
 ]
 
 

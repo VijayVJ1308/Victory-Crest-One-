@@ -92,6 +92,10 @@ from backend.app.models.project import (
     ProjectTimesheet,
     ProjectExpense
 )
+from backend.app.models.bi import (
+    BiReportSnapshot,
+    BiSavedQuery
+)
 
 __all__ = [
     "Base",
@@ -166,7 +170,9 @@ __all__ = [
     "ProjectMilestone",
     "ProjectTask",
     "ProjectTimesheet",
-    "ProjectExpense"
+    "ProjectExpense",
+    "BiReportSnapshot",
+    "BiSavedQuery"
 ]
 
 

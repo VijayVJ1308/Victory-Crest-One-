@@ -1296,6 +1296,249 @@ def calculate_project_kpis(
     }
 
 
+# ============================================================================
+# Phase 14: Business Intelligence & Executive Analytics
+# ============================================================================
+
+def calculate_financial_ratios(
+    revenue: Number,
+    cogs: Number = 0,
+    opex: Number = 0,
+    depreciation: Number = 0,
+    interest: Number = 0,
+    tax: Number = 0,
+    current_assets: Number = 0,
+    current_liabilities: Number = 0,
+    total_assets: Number = 0,
+    total_equity: Number = 0
+) -> dict:
+    """
+    Compute executive financial health ratios:
+    - Gross Profit & Gross Margin %
+    - Gross Operating Profit (GOP) & GOP Margin %
+    - EBIT / Operating Income & Operating Margin %
+    - EBITDA & EBITDA Margin %
+    - Net Income & Net Profit Margin %
+    - Current Ratio (Liquidity)
+    - Return on Assets (ROA %) & Return on Equity (ROE %)
+    """
+    rev = max(Decimal("0.00"), to_decimal(revenue))
+    c = max(Decimal("0.00"), to_decimal(cogs))
+    op = max(Decimal("0.00"), to_decimal(opex))
+    dep = max(Decimal("0.00"), to_decimal(depreciation))
+    intr = max(Decimal("0.00"), to_decimal(interest))
+    tx = max(Decimal("0.00"), to_decimal(tax))
+    ca = max(Decimal("0.00"), to_decimal(current_assets))
+    cl = max(Decimal("0.00"), to_decimal(current_liabilities))
+    ta = max(Decimal("0.00"), to_decimal(total_assets))
+    te = max(Decimal("0.00"), to_decimal(total_equity))
+
+    gross_profit = rev - c
+    gross_margin_pct = ((gross_profit / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+    # GOP (Gross Operating Profit) standard: Revenue minus direct operational delivery costs
+    gop = gross_profit - (op * Decimal("0.40"))  # direct operational opex
+    gop_margin_pct = ((gop / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+    # EBIT (Operating Income) = Gross Profit - Total OPEX
+    ebit = gross_profit - op
+    operating_margin_pct = ((ebit / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+    # EBITDA = EBIT + Depreciation & Amortization
+    ebitda = ebit + dep
+    ebitda_margin_pct = ((ebitda / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+    # Net Income = EBIT - Interest - Tax
+    net_income = ebit - intr - tx
+    net_margin_pct = ((net_income / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+    # Liquidity: Current Ratio = Current Assets / Current Liabilities
+    if cl > Decimal("0.00"):
+        current_ratio = (ca / cl).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        current_ratio = Decimal("0.00")
+
+    # Profitability Ratios: ROA & ROE
+    roa_pct = ((net_income / ta) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if ta > Decimal("0.00") else Decimal("0.00")
+    roe_pct = ((net_income / te) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if te > Decimal("0.00") else Decimal("0.00")
+
+    return {
+        "revenue": rev.quantize(Decimal("0.01")),
+        "gross_profit": gross_profit.quantize(Decimal("0.01")),
+        "gross_margin_percent": gross_margin_pct,
+        "gop": gop.quantize(Decimal("0.01")),
+        "gop_margin_percent": gop_margin_pct,
+        "ebit": ebit.quantize(Decimal("0.01")),
+        "operating_margin_percent": operating_margin_pct,
+        "ebitda": ebitda.quantize(Decimal("0.01")),
+        "ebitda_margin_percent": ebitda_margin_pct,
+        "net_income": net_income.quantize(Decimal("0.01")),
+        "net_margin_percent": net_margin_pct,
+        "current_ratio": current_ratio,
+        "roa_percent": roa_pct,
+        "roe_percent": roe_pct
+    }
+
+
+def calculate_portfolio_kpis(properties_data: list) -> dict:
+    """
+    Consolidate multi-property enterprise performance:
+    - Total consolidated revenue & GOP
+    - Blended occupancy %, Average ADR, RevPAR
+    - Breakdown of room, dining, retail, and service revenues
+    """
+    tot_rev = Decimal("0.00")
+    tot_gop = Decimal("0.00")
+    tot_rooms_rev = Decimal("0.00")
+    tot_dining_rev = Decimal("0.00")
+    tot_retail_rev = Decimal("0.00")
+    tot_service_rev = Decimal("0.00")
+
+    occ_weighted_sum = Decimal("0.00")
+    adr_weighted_sum = Decimal("0.00")
+    total_available_rooms = Decimal("0.00")
+
+    for p in properties_data:
+        r = to_decimal(p.get("revenue", p.get("total_revenue", 0)))
+        g = to_decimal(p.get("gop", 0))
+        rr = to_decimal(p.get("rooms_revenue", p.get("room_revenue", 0)))
+        dr = to_decimal(p.get("dining_revenue", 0))
+        rt = to_decimal(p.get("retail_revenue", 0))
+        sr = to_decimal(p.get("service_revenue", 0))
+
+        tot_rev += r
+        tot_gop += g
+        tot_rooms_rev += rr
+        tot_dining_rev += dr
+        tot_retail_rev += rt
+        tot_service_rev += sr
+
+        rooms = to_decimal(p.get("available_rooms", p.get("rooms_count", 50)))
+        total_available_rooms += rooms
+
+        occ = to_decimal(p.get("occupancy_percent", 0))
+        adr = to_decimal(p.get("adr", 0))
+        occ_weighted_sum += (occ * rooms)
+        adr_weighted_sum += (adr * rooms)
+
+    if total_available_rooms > Decimal("0.00"):
+        blended_occ = (occ_weighted_sum / total_available_rooms).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        avg_adr = (adr_weighted_sum / total_available_rooms).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        blended_occ = Decimal("0.00")
+        avg_adr = Decimal("0.00")
+
+    blended_revpar = ((blended_occ / Decimal("100.00")) * avg_adr).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    gop_margin = ((tot_gop / tot_rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if tot_rev > Decimal("0.00") else Decimal("0.00")
+
+    return {
+        "total_properties": len(properties_data),
+        "total_revenue": tot_rev.quantize(Decimal("0.01")),
+        "total_gop": tot_gop.quantize(Decimal("0.01")),
+        "gop_margin_percent": gop_margin,
+        "total_rooms_revenue": tot_rooms_rev.quantize(Decimal("0.01")),
+        "total_dining_revenue": tot_dining_rev.quantize(Decimal("0.01")),
+        "total_retail_revenue": tot_retail_rev.quantize(Decimal("0.01")),
+        "total_service_revenue": tot_service_rev.quantize(Decimal("0.01")),
+        "blended_occupancy_percent": blended_occ,
+        "average_adr": avg_adr,
+        "blended_revpar": blended_revpar
+    }
+
+
+def calculate_department_contributions(departments_data: list) -> list:
+    """
+    Calculate department revenue share and profit margins for executive P&L ranking.
+    """
+    total_rev = Decimal("0.00")
+    for d in departments_data:
+        total_rev += to_decimal(d.get("revenue", 0))
+
+    results = []
+    for d in departments_data:
+        rev = to_decimal(d.get("revenue", 0))
+        exp = to_decimal(d.get("expenses", 0))
+        net = rev - exp
+
+        share = ((rev / total_rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total_rev > Decimal("0.00") else Decimal("0.00")
+        margin = ((net / rev) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if rev > Decimal("0.00") else Decimal("0.00")
+
+        results.append({
+            "department": d.get("department", "General"),
+            "revenue": rev.quantize(Decimal("0.01")),
+            "expenses": exp.quantize(Decimal("0.01")),
+            "net_profit": net.quantize(Decimal("0.01")),
+            "profit_margin_percent": margin,
+            "revenue_share_percent": share
+        })
+
+    # Sort descending by revenue
+    results.sort(key=lambda x: x["revenue"], reverse=True)
+    return results
+
+
+def calculate_linear_forecast(historical_points: list, periods_ahead: int = 1) -> dict:
+    """
+    Simple linear trend regression for revenue trajectory forecasting:
+    y = mx + b
+    Returns forecast values, average growth rate, and predicted next period.
+    """
+    if not historical_points:
+        return {
+            "forecast_values": [Decimal("0.00")] * periods_ahead,
+            "next_period_prediction": Decimal("0.00"),
+            "growth_rate_percent": Decimal("0.00"),
+            "historical_mean": Decimal("0.00")
+        }
+
+    points = [to_decimal(p) for p in historical_points]
+    n = len(points)
+    if n == 1:
+        return {
+            "forecast_values": [points[0]] * periods_ahead,
+            "next_period_prediction": points[0],
+            "growth_rate_percent": Decimal("0.00"),
+            "historical_mean": points[0]
+        }
+
+    x_vals = [Decimal(i) for i in range(n)]
+    sum_x = sum(x_vals)
+    sum_y = sum(points)
+    sum_xx = sum(x * x for x in x_vals)
+    sum_xy = sum(x * y for x, y in zip(x_vals, points))
+
+    denom = (Decimal(n) * sum_xx) - (sum_x * sum_x)
+    if denom == Decimal("0.00"):
+        slope = Decimal("0.00")
+        intercept = sum_y / Decimal(n)
+    else:
+        slope = ((Decimal(n) * sum_xy) - (sum_x * sum_y)) / denom
+        intercept = (sum_y - (slope * sum_x)) / Decimal(n)
+
+    forecast_vals = []
+    for k in range(1, periods_ahead + 1):
+        pred = max(Decimal("0.00"), (slope * Decimal(n - 1 + k)) + intercept)
+        forecast_vals.append(pred.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    # Growth rate from first to last point
+    first_pt = points[0]
+    last_pt = points[-1]
+    if first_pt > Decimal("0.00"):
+        growth = (((last_pt - first_pt) / first_pt) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    else:
+        growth = Decimal("0.00")
+
+    mean_val = (sum_y / Decimal(n)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "forecast_values": forecast_vals,
+        "next_period_prediction": forecast_vals[0],
+        "growth_rate_percent": growth,
+        "historical_mean": mean_val
+    }
+
+
+
 
 
 

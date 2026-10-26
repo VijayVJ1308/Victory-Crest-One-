@@ -170,7 +170,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "📈",
         "description": "Star-schema analytical cubes, cross-module data extraction, and executive reports.",
         "phase": 14,
-        "status": "planned"
+        "status": "active"
     },
     {
         "id": "ai_assistant",

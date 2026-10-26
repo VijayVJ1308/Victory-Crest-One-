@@ -40,6 +40,7 @@ def test_main_window_shell_initialization(qapp):
     assert "sales" in window.nav_buttons
     assert "finance" in window.nav_buttons
     assert "projects" in window.nav_buttons
+    assert "bi" in window.nav_buttons
     
     # Test navigation to modules
     window.navigate_to("modules")
@@ -53,10 +54,14 @@ def test_main_window_shell_initialization(qapp):
     window.navigate_to("projects")
     assert window.view_stack.currentIndex() == 15
 
-    # Test navigation to a planned module (bi)
+    # Test navigation to an active module (bi)
     window.navigate_to("bi")
+    assert window.view_stack.currentIndex() == 16
+
+    # Test navigation to a planned module (automation)
+    window.navigate_to("automation")
     assert window.view_stack.currentIndex() == 2
-    assert window.planned_module_view.current_module_id == "bi"
+    assert window.planned_module_view.current_module_id == "automation"
     
     # Return to dashboard
     window.navigate_to("dashboard")

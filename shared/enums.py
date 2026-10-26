@@ -580,6 +580,43 @@ class ProjectExpenseCategory(str, Enum):
     MISC = "MISC"
 
 
+# ============================================================================
+# Phase 14: Business Intelligence & Executive Analytics
+# ============================================================================
+
+class ReportType(str, Enum):
+    EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY"
+    FINANCIAL_PERFORMANCE = "FINANCIAL_PERFORMANCE"
+    DEPARTMENTAL_P_AND_L = "DEPARTMENTAL_P_AND_L"
+    OCCUPANCY_AND_REVPAR = "OCCUPANCY_AND_REVPAR"
+    SALES_PIPELINE = "SALES_PIPELINE"
+    MANUFACTURING_EFFICIENCY = "MANUFACTURING_EFFICIENCY"
+    PROJECT_PROFITABILITY = "PROJECT_PROFITABILITY"
+
+
+class ReportFormat(str, Enum):
+    JSON = "JSON"
+    CSV = "CSV"
+    EXCEL = "EXCEL"
+    PDF = "PDF"
+
+
+class MetricPeriod(str, Enum):
+    DAILY = "DAILY"
+    WEEKLY = "WEEKLY"
+    MONTHLY = "MONTHLY"
+    QUARTERLY = "QUARTERLY"
+    YEAR_TO_DATE = "YEAR_TO_DATE"
+
+
+class AnalyticalDimension(str, Enum):
+    PROPERTY = "PROPERTY"
+    ORGANISATION = "ORGANISATION"
+    DEPARTMENT = "DEPARTMENT"
+    CUSTOMER_SEGMENT = "CUSTOMER_SEGMENT"
+
+
+
 
 
 

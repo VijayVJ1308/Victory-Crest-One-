@@ -32,6 +32,7 @@ from desktop.ui.views.service_view import ServiceManagementView
 from desktop.ui.views.hospitality_view import HospitalityView
 from desktop.ui.views.manufacturing_view import ManufacturingView
 from desktop.ui.views.projects_view import ProjectsView
+from desktop.ui.views.bi_view import BusinessIntelligenceView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -95,6 +96,7 @@ class MainWindow(QMainWindow):
         self.hospitality_view = HospitalityView()
         self.manufacturing_view = ManufacturingView()
         self.projects_view = ProjectsView()
+        self.bi_view = BusinessIntelligenceView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -112,6 +114,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.hospitality_view)         # index 13: hospitality & dining
         self.view_stack.addWidget(self.manufacturing_view)       # index 14: manufacturing & assets
         self.view_stack.addWidget(self.projects_view)            # index 15: project management & psa
+        self.view_stack.addWidget(self.bi_view)                  # index 16: business intelligence & analytics
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -155,7 +158,7 @@ class MainWindow(QMainWindow):
             ("CORE & EXECUTIVE", [
                 ("dashboard", "📊  Overview", "active"),
                 ("modules", "🏢  Module Catalog", "active"),
-                ("bi", "📈  Business Intelligence", "planned"),
+                ("bi", "📈  Business Intelligence", "active"),
                 ("automation", "⚡  Workflow Automation", "planned"),
                 ("ai_assistant", "🤖  AI Assistant", "planned"),
             ]),
@@ -327,6 +330,8 @@ class MainWindow(QMainWindow):
             self.manufacturing_view.refresh_data()
         if hasattr(self, "projects_view"):
             self.projects_view.refresh_data()
+        if hasattr(self, "bi_view"):
+            self.bi_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -485,6 +490,10 @@ class MainWindow(QMainWindow):
             self.projects_view.refresh_data()
             self.projects_view.tabs.setCurrentIndex(0)  # Project Portfolios
             self.view_stack.setCurrentIndex(15)
+        elif key == "bi":
+            self.bi_view.refresh_data()
+            self.bi_view.tabs.setCurrentIndex(0)  # Executive Overview
+            self.view_stack.setCurrentIndex(16)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

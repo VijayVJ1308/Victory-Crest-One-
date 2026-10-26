@@ -24,7 +24,8 @@ from backend.app.api.v1.endpoints import (
     service,
     hospitality,
     manufacturing,
-    projects
+    projects,
+    bi
 )
 
 api_router = APIRouter()
@@ -50,6 +51,7 @@ api_router.include_router(service.router, tags=["Customer & Field Service"])
 api_router.include_router(hospitality.router, tags=["Hospitality PMS & Restaurant Dining"])
 api_router.include_router(manufacturing.router, tags=["Manufacturing & Production Orders"])
 api_router.include_router(projects.router, tags=["Project Management & PSA"])
+api_router.include_router(bi.router, tags=["Business Intelligence & Analytics"])
 
 
 
