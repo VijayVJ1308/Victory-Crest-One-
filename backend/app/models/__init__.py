@@ -118,6 +118,10 @@ from backend.app.models.security import (
     SecurityIncidentEvent,
     QuarantinedEntity
 )
+from backend.app.models.dr import (
+    CloudReplicaNode,
+    FailoverDrillExecution
+)
 
 __all__ = [
     "Base",
@@ -206,6 +210,8 @@ __all__ = [
     "MlModelRegistry",
     "SecurityComplianceCheck",
     "SecurityIncidentEvent",
-    "QuarantinedEntity"
+    "QuarantinedEntity",
+    "CloudReplicaNode",
+    "FailoverDrillExecution"
 ]
 

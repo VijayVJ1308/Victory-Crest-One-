@@ -30,6 +30,7 @@ class ModuleType(str, Enum):
     IOT_GATEWAYS = "iot_gateways"
     ANALYTICS_LAKE = "analytics_lake"
     CYBERSECURITY_GOVERNANCE = "cybersecurity_governance"
+    MULTI_CLOUD_DR = "multi_cloud_dr"
     SETTINGS = "settings"
 
 
@@ -813,6 +814,54 @@ class SecurityRemediationAction(str, Enum):
     LOCK_USER_ACCOUNT = "LOCK_USER_ACCOUNT"
     FORCE_MFA_CHALLENGE = "FORCE_MFA_CHALLENGE"
     LOG_AND_FLAG = "LOG_AND_FLAG"
+
+
+# ============================================================================
+# Phase 20: Multi-Cloud Resiliency & Autonomous DR
+# ============================================================================
+
+class CloudProvider(str, Enum):
+    AWS = "AWS"
+    AZURE = "AZURE"
+    GCP = "GCP"
+    ON_PREMISE = "ON_PREMISE"
+
+
+class ReplicationMode(str, Enum):
+    SYNCHRONOUS = "SYNCHRONOUS"
+    ASYNCHRONOUS = "ASYNCHRONOUS"
+    SEMI_SYNC = "SEMI_SYNC"
+
+
+class NodeRole(str, Enum):
+    PRIMARY = "PRIMARY"
+    HOT_STANDBY = "HOT_STANDBY"
+    COLD_STANDBY = "COLD_STANDBY"
+    WITNESS = "WITNESS"
+
+
+class NodeHealthStatus(str, Enum):
+    HEALTHY = "HEALTHY"
+    DEGRADED = "DEGRADED"
+    FAILING = "FAILING"
+    STANDBY = "STANDBY"
+    OFFLINE = "OFFLINE"
+
+
+class FailoverDrillType(str, Enum):
+    ZONE_OUTAGE = "ZONE_OUTAGE"
+    DATABASE_SPLIT_BRAIN = "DATABASE_SPLIT_BRAIN"
+    LATENCY_SPIKE = "LATENCY_SPIKE"
+    REGIONAL_BLACKOUT = "REGIONAL_BLACKOUT"
+
+
+class FailoverDrillStatus(str, Enum):
+    SCHEDULED = "SCHEDULED"
+    IN_PROGRESS = "IN_PROGRESS"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    ABORTED = "ABORTED"
+
 
 
 

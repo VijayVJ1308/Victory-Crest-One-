@@ -150,6 +150,19 @@ from backend.app.schemas.security import (
     CredentialEntropyResponse,
     SecurityPostureMetricsOut
 )
+from backend.app.schemas.dr import (
+    CloudReplicaNodeBase,
+    CloudReplicaNodeCreate,
+    CloudReplicaNodeOut,
+    FailoverDrillBase,
+    FailoverDrillCreate,
+    FailoverDrillOut,
+    FailoverTriggerRequest,
+    FailoverTriggerResponse,
+    ReplicationLagTestRequest,
+    ReplicationLagTestResponse,
+    DrResiliencyMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -377,7 +390,18 @@ __all__ = [
     "ThreatEvaluationResponse",
     "CredentialEntropyRequest",
     "CredentialEntropyResponse",
-    "SecurityPostureMetricsOut"
+    "SecurityPostureMetricsOut",
+    "CloudReplicaNodeBase",
+    "CloudReplicaNodeCreate",
+    "CloudReplicaNodeOut",
+    "FailoverDrillBase",
+    "FailoverDrillCreate",
+    "FailoverDrillOut",
+    "FailoverTriggerRequest",
+    "FailoverTriggerResponse",
+    "ReplicationLagTestRequest",
+    "ReplicationLagTestResponse",
+    "DrResiliencyMetricsOut"
 ]
 
 

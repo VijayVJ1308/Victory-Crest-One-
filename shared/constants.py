@@ -224,7 +224,7 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🌐",
         "description": "Continuous cross-cloud standby replication, automated failover drills, and zero-RPO disaster recovery.",
         "phase": 20,
-        "status": "planned"
+        "status": "active"
     },
 
 

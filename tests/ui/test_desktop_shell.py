@@ -78,10 +78,14 @@ def test_main_window_shell_initialization(qapp):
     window.navigate_to("cybersecurity_governance")
     assert window.view_stack.currentIndex() == 21
 
-    # Test navigation to a planned module (multi_cloud_dr)
+    # Test navigation to an active module (multi_cloud_dr)
     window.navigate_to("multi_cloud_dr")
+    assert window.view_stack.currentIndex() == 22
+
+    # Test navigation to an unplanned future module fallback
+    window.navigate_to("future_quantum_compute")
     assert window.view_stack.currentIndex() == 2
-    assert window.planned_module_view.current_module_id == "multi_cloud_dr"
+    assert window.planned_module_view.current_module_id == "future_quantum_compute"
     
     # Return to dashboard
     window.navigate_to("dashboard")

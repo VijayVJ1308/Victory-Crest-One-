@@ -4,7 +4,7 @@ Decimal-safe and zero-division-protected calculation functions for KPIs, hospita
 
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Union, Optional, Dict, List, Any, Tuple
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import math
 
 Number = Union[int, float, Decimal]
@@ -2500,6 +2500,222 @@ def calculate_security_posture_metrics(
         "quarantined_actors_count": active_quarantined,
         "framework_scores": comp_res["framework_scores"]
     }
+
+
+# ============================================================================
+# Phase 20: Multi-Cloud Resiliency & Autonomous DR
+# ============================================================================
+
+def calculate_replication_lag(
+    last_sync_timestamp: datetime,
+    current_timestamp: Optional[datetime] = None
+) -> Tuple[Decimal, str]:
+    """
+    Calculate replication delay in seconds and classify synchronization tier.
+    Returns: (lag_seconds, lag_tier)
+    Lag tiers: SYNCHRONIZED_ZERO_RPO (<1s), NOMINAL_STANDBY (<5s), ELEVATED_LAG (<30s), DESYNCHRONIZED_ALERT (>=30s).
+    """
+    if current_timestamp is None:
+        current_timestamp = datetime.now(timezone.utc)
+
+    # Standardize timezones
+    if last_sync_timestamp.tzinfo is None and current_timestamp.tzinfo is not None:
+        last_sync_timestamp = last_sync_timestamp.replace(tzinfo=timezone.utc)
+    elif last_sync_timestamp.tzinfo is not None and current_timestamp.tzinfo is None:
+        current_timestamp = current_timestamp.replace(tzinfo=timezone.utc)
+
+    elapsed = (current_timestamp - last_sync_timestamp).total_seconds()
+    if elapsed < 0:
+        elapsed = 0.0
+
+    lag_dec = Decimal(str(elapsed)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+
+    if lag_dec < Decimal("1.000"):
+        tier = "SYNCHRONIZED_ZERO_RPO"
+    elif lag_dec < Decimal("5.000"):
+        tier = "NOMINAL_STANDBY"
+    elif lag_dec < Decimal("30.000"):
+        tier = "ELEVATED_LAG"
+    else:
+        tier = "DESYNCHRONIZED_ALERT"
+
+    return lag_dec, tier
+
+
+def calculate_dr_rto_rpo_metrics(
+    dr_nodes: List[Dict[str, Any]],
+    drills: List[Dict[str, Any]],
+    target_rto_seconds: Number = 30.0,
+    target_rpo_seconds: Number = 1.0
+) -> Dict[str, Any]:
+    """
+    Compute multi-cloud disaster recovery metrics, RTO/RPO SLA compliance,
+    and failover drill performance telemetry.
+    """
+    total_nodes = len(dr_nodes)
+    healthy_nodes = 0
+    active_primary_count = 0
+    hot_standby_count = 0
+    max_lag = Decimal("0.000")
+    total_lag = Decimal("0.000")
+
+    for node in dr_nodes:
+        status = str(node.get("health_status", "")).upper()
+        role = str(node.get("role", "")).upper()
+        lag = to_decimal(node.get("replication_lag_seconds", 0))
+
+        if status in ("HEALTHY", "STANDBY"):
+            healthy_nodes += 1
+        if role == "PRIMARY" and status == "HEALTHY":
+            active_primary_count += 1
+        if role == "HOT_STANDBY" and status in ("HEALTHY", "STANDBY"):
+            hot_standby_count += 1
+
+        total_lag += lag
+        if lag > max_lag:
+            max_lag = lag
+
+    avg_lag = (total_lag / Decimal(str(total_nodes))).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP) if total_nodes > 0 else Decimal("0.000")
+
+    total_drills = len(drills)
+    succeeded_drills = 0
+    total_rto = Decimal("0.00")
+    total_rpo = Decimal("0.00")
+
+    for drill in drills:
+        d_status = str(drill.get("status", "")).upper()
+        if d_status == "SUCCEEDED":
+            succeeded_drills += 1
+        total_rto += to_decimal(drill.get("actual_rto_seconds", 0))
+        total_rpo += to_decimal(drill.get("actual_rpo_seconds", 0))
+
+    drill_success_rate = (
+        ((Decimal(str(succeeded_drills)) / Decimal(str(total_drills))) * Decimal("100.00")).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        ) if total_drills > 0 else Decimal("100.00")
+    )
+
+    avg_rto = (total_rto / Decimal(str(total_drills))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total_drills > 0 else Decimal("0.00")
+    avg_rpo = (total_rpo / Decimal(str(total_drills))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total_drills > 0 else Decimal("0.00")
+
+    tgt_rto = to_decimal(target_rto_seconds)
+    tgt_rpo = to_decimal(target_rpo_seconds)
+
+    rto_sla_met = avg_rto <= tgt_rto if total_drills > 0 else True
+    rpo_sla_met = max_lag <= tgt_rpo
+
+    availability_pct = (
+        ((Decimal(str(healthy_nodes)) / Decimal(str(total_nodes))) * Decimal("100.00")).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        ) if total_nodes > 0 else Decimal("100.00")
+    )
+
+    return {
+        "total_nodes": total_nodes,
+        "healthy_nodes": healthy_nodes,
+        "active_primary_count": active_primary_count,
+        "hot_standby_count": hot_standby_count,
+        "cluster_availability_percent": availability_pct,
+        "max_replication_lag_seconds": max_lag.quantize(Decimal("0.001")),
+        "avg_replication_lag_seconds": avg_lag.quantize(Decimal("0.001")),
+        "total_drills": total_drills,
+        "succeeded_drills": succeeded_drills,
+        "drill_success_rate_percent": drill_success_rate,
+        "avg_actual_rto_seconds": avg_rto,
+        "avg_actual_rpo_seconds": avg_rpo,
+        "target_rto_seconds": tgt_rto,
+        "target_rpo_seconds": tgt_rpo,
+        "rto_sla_met": rto_sla_met,
+        "rpo_sla_met": rpo_sla_met,
+        "is_zero_rpo_compliant": max_lag < Decimal("1.000")
+    }
+
+
+def calculate_chaos_resiliency_score(
+    nodes: List[Dict[str, Any]],
+    drills: List[Dict[str, Any]]
+) -> Tuple[Decimal, str]:
+    """
+    Calculate consolidated multi-cloud chaos engineering resiliency index (0.0 to 100.0).
+    Evaluates cloud diversity, hot standby redundancy, failover drill success rate, and replication lag.
+    Returns: (resiliency_score, resiliency_tier)
+    Tiers: TIER_4_FAULT_TOLERANT (>=90.0), TIER_3_HIGH_AVAILABILITY (>=80.0), TIER_2_REDUNDANT (>=65.0), TIER_1_VULNERABLE (<65.0).
+    """
+    base_score = Decimal("100.00")
+    deductions = Decimal("0.00")
+
+    # 1. Multi-Cloud Provider Diversity
+    healthy_providers = set()
+    has_hot_standby = False
+    degraded_count = 0
+    failing_count = 0
+    max_lag = Decimal("0.000")
+
+    for n in nodes:
+        prov = str(n.get("provider", "")).upper()
+        st = str(n.get("health_status", "")).upper()
+        role = str(n.get("role", "")).upper()
+        lag = to_decimal(n.get("replication_lag_seconds", 0))
+
+        if st in ("HEALTHY", "STANDBY"):
+            healthy_providers.add(prov)
+            if role == "HOT_STANDBY":
+                has_hot_standby = True
+        elif st == "DEGRADED":
+            degraded_count += 1
+        elif st in ("FAILING", "OFFLINE"):
+            failing_count += 1
+
+        if lag > max_lag:
+            max_lag = lag
+
+    # Diversity scoring: optimal is >= 3 distinct cloud environments (e.g. AWS + Azure + GCP)
+    prov_count = len(healthy_providers)
+    if prov_count >= 3:
+        pass
+    elif prov_count == 2:
+        deductions += Decimal("10.00")
+    elif prov_count == 1:
+        deductions += Decimal("25.00")
+    else:
+        deductions += Decimal("50.00")
+
+    # Redundancy check
+    if not has_hot_standby:
+        deductions += Decimal("25.00")
+
+    # Degraded/Failing node penalties
+    node_penalties = (Decimal(str(degraded_count)) * Decimal("10.00")) + (Decimal(str(failing_count)) * Decimal("20.00"))
+    deductions += min(Decimal("30.00"), node_penalties)
+
+    # Replication lag penalty
+    if max_lag >= Decimal("30.000"):
+        deductions += Decimal("20.00")
+    elif max_lag >= Decimal("5.000"):
+        deductions += Decimal("10.00")
+
+    # Drill readiness penalty
+    if drills:
+        succeeded = sum(1 for d in drills if str(d.get("status", "")).upper() == "SUCCEEDED")
+        rate = (Decimal(str(succeeded)) / Decimal(str(len(drills)))) * Decimal("100.00")
+        if rate < Decimal("80.00"):
+            deductions += Decimal("15.00")
+
+    final_score = max(Decimal("0.00"), min(Decimal("100.00"), base_score - deductions)).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+
+    if final_score >= Decimal("90.00"):
+        tier = "TIER_4_FAULT_TOLERANT"
+    elif final_score >= Decimal("80.00"):
+        tier = "TIER_3_HIGH_AVAILABILITY"
+    elif final_score >= Decimal("65.00"):
+        tier = "TIER_2_REDUNDANT"
+    else:
+        tier = "TIER_1_VULNERABLE"
+
+    return final_score, tier
+
 
 
 

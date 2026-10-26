@@ -3163,6 +3163,143 @@ class ApiClient:
         from backend.app.services.security_service import security_service
         return security_service.get_posture_metrics(property_id=property_id).model_dump()
 
+    # ---------------------------------------------------------
+    # Multi-Cloud Resiliency & Autonomous DR
+    # ---------------------------------------------------------
+    def get_dr_nodes(
+        self,
+        property_id: Optional[str] = None,
+        provider: Optional[str] = None,
+        role: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/nodes"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if provider:
+            params["provider"] = provider
+        if role:
+            params["role"] = role
+        if status:
+            params["status"] = status
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        return [n.model_dump() for n in dr_service.get_nodes(property_id=property_id, provider=provider, role=role, status_filter=status)]
+
+    def register_dr_node(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/nodes"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        from backend.app.schemas.dr import CloudReplicaNodeCreate
+        return dr_service.create_node(CloudReplicaNodeCreate(**data)).model_dump()
+
+    def promote_dr_node(self, node_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/nodes/{node_id}/promote"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        return dr_service.promote_node(node_id).model_dump()
+
+    def get_dr_drills(
+        self,
+        status: Optional[str] = None,
+        drill_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/drills"
+        params = {}
+        if status:
+            params["status"] = status
+        if drill_type:
+            params["drill_type"] = drill_type
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        return [d.model_dump() for d in dr_service.get_drills(status_filter=status, drill_type=drill_type)]
+
+    def trigger_dr_failover_drill(
+        self,
+        drill_type: str = "ZONE_OUTAGE",
+        primary_node: Optional[str] = None,
+        standby_node: Optional[str] = None,
+        simulate_network_partition: bool = True
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/drills/trigger"
+        body = {
+            "drill_type": drill_type,
+            "target_primary_node": primary_node,
+            "promoted_standby_node": standby_node,
+            "simulate_network_partition": simulate_network_partition
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        from backend.app.schemas.dr import FailoverTriggerRequest
+        return dr_service.trigger_failover_drill(FailoverTriggerRequest(**body)).model_dump()
+
+    def test_dr_replication_lag(
+        self,
+        node_code: str,
+        bytes_behind: int = 0,
+        packet_loss: float = 0.0
+    ) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/replication/test"
+        body = {
+            "node_code": node_code,
+            "simulated_bytes_behind": bytes_behind,
+            "packet_loss_percent": packet_loss
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        from backend.app.schemas.dr import ReplicationLagTestRequest
+        return dr_service.test_replication_lag(ReplicationLagTestRequest(**body)).model_dump()
+
+    def get_dr_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/dr/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.dr_service import dr_service
+        return dr_service.get_resiliency_metrics(property_id=property_id).model_dump()
+
 
 api_client = ApiClient()
 

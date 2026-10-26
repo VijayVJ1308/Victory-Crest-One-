@@ -30,7 +30,8 @@ from backend.app.api.v1.endpoints import (
     ai_assistant,
     iot,
     lakehouse,
-    security
+    security,
+    dr
 )
 
 api_router = APIRouter()
@@ -62,6 +63,7 @@ api_router.include_router(ai_assistant.router, prefix="/ai", tags=["AI Business 
 api_router.include_router(iot.router, prefix="/iot", tags=["IoT & Smart Device Gateways"])
 api_router.include_router(lakehouse.router, prefix="/lakehouse", tags=["Data Lakehouse & Predictive ML"])
 api_router.include_router(security.router, prefix="/security", tags=["Zero-Trust Security & Compliance Auditor"])
+api_router.include_router(dr.router, prefix="/dr", tags=["Multi-Cloud Resiliency & Autonomous DR"])
 
 
 

@@ -23,6 +23,7 @@ from desktop.ui.views.ai_assistant_view import AiAssistantView
 from desktop.ui.views.iot_view import IoTGatewaysView
 from desktop.ui.views.lakehouse_view import LakehouseView
 from desktop.ui.views.security_view import SecurityGovernanceView
+from desktop.ui.views.dr_view import MultiCloudDrView
 
 __all__ = [
     "DashboardView",
@@ -46,8 +47,10 @@ __all__ = [
     "AiAssistantView",
     "IoTGatewaysView",
     "LakehouseView",
-    "SecurityGovernanceView"
+    "SecurityGovernanceView",
+    "MultiCloudDrView",
 ]
+
 
 
 
