@@ -105,6 +105,13 @@ from backend.app.schemas.automation import (
     WorkflowDispatchResponse,
     WorkflowTelemetryOut
 )
+from backend.app.schemas.ai_assistant import (
+    AiQueryRequest,
+    AiQueryResponse,
+    AiMessageOut,
+    AiThreadOut,
+    AiAssistantTelemetryOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -295,7 +302,12 @@ __all__ = [
     "WorkflowExecutionLogOut",
     "WorkflowDispatchEventRequest",
     "WorkflowDispatchResponse",
-    "WorkflowTelemetryOut"
+    "WorkflowTelemetryOut",
+    "AiQueryRequest",
+    "AiQueryResponse",
+    "AiMessageOut",
+    "AiThreadOut",
+    "AiAssistantTelemetryOut"
 ]
 
 

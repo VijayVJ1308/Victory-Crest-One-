@@ -662,6 +662,42 @@ class ComparisonOperator(str, Enum):
     IN = "IN"
 
 
+# ============================================================================
+# Phase 16: AI Business Assistant & Semantic Executive Q&A
+# ============================================================================
+
+class AiQueryIntent(str, Enum):
+    EXECUTIVE_KPI = "EXECUTIVE_KPI"
+    REVENUE_ANALYSIS = "REVENUE_ANALYSIS"
+    OCCUPANCY_STATUS = "OCCUPANCY_STATUS"
+    FINANCIAL_HEALTH = "FINANCIAL_HEALTH"
+    INVENTORY_AUDIT = "INVENTORY_AUDIT"
+    STAFFING_OVERVIEW = "STAFFING_OVERVIEW"
+    PROJECT_DELIVERY = "PROJECT_DELIVERY"
+    SERVICE_SLA = "SERVICE_SLA"
+    GENERAL_INQUIRY = "GENERAL_INQUIRY"
+
+
+class AiResponseFormat(str, Enum):
+    TEXT = "TEXT"
+    METRIC_CARD = "METRIC_CARD"
+    TABULAR_DATA = "TABULAR_DATA"
+    ACTION_RECOMMENDATION = "ACTION_RECOMMENDATION"
+
+
+class AiMessageRole(str, Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+
+
+class AiSafetyRating(str, Enum):
+    SAFE = "SAFE"
+    CONFIDENTIAL_RESTRICTED = "CONFIDENTIAL_RESTRICTED"
+    NEEDS_ELEVATED_PERMISSION = "NEEDS_ELEVATED_PERMISSION"
+
+
+
 
 
 

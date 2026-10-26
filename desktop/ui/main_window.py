@@ -34,6 +34,7 @@ from desktop.ui.views.manufacturing_view import ManufacturingView
 from desktop.ui.views.projects_view import ProjectsView
 from desktop.ui.views.bi_view import BusinessIntelligenceView
 from desktop.ui.views.automation_view import WorkflowAutomationView
+from desktop.ui.views.ai_assistant_view import AiAssistantView
 from desktop.ui.login_window import LoginDialog
 from desktop.ui.components.status_badge import StatusBadge
 
@@ -99,6 +100,7 @@ class MainWindow(QMainWindow):
         self.projects_view = ProjectsView()
         self.bi_view = BusinessIntelligenceView()
         self.automation_view = WorkflowAutomationView()
+        self.ai_assistant_view = AiAssistantView()
 
         self.view_stack.addWidget(self.dashboard_view)          # index 0: dashboard
         self.view_stack.addWidget(self.module_catalog_view)     # index 1: modules
@@ -118,6 +120,7 @@ class MainWindow(QMainWindow):
         self.view_stack.addWidget(self.projects_view)            # index 15: project management & psa
         self.view_stack.addWidget(self.bi_view)                  # index 16: business intelligence & analytics
         self.view_stack.addWidget(self.automation_view)          # index 17: workflow automation & rules engine
+        self.view_stack.addWidget(self.ai_assistant_view)       # index 18: ai business assistant
 
         content_layout.addWidget(self.view_stack)
         root_layout.addWidget(content_column)
@@ -163,7 +166,8 @@ class MainWindow(QMainWindow):
                 ("modules", "🏢  Module Catalog", "active"),
                 ("bi", "📈  Business Intelligence", "active"),
                 ("automation", "⚡  Workflow Automation", "active"),
-                ("ai_assistant", "🤖  AI Assistant", "planned"),
+                ("ai_assistant", "🤖  AI Assistant", "active"),
+                ("iot_gateways", "📡  IoT & Smart Devices", "planned"),
             ]),
             ("SALES & REVENUE", [
                 ("sales", "💼  Sales & CRM", "active"),
@@ -337,6 +341,8 @@ class MainWindow(QMainWindow):
             self.bi_view.refresh_data()
         if hasattr(self, "automation_view"):
             self.automation_view.refresh_data()
+        if hasattr(self, "ai_assistant_view"):
+            self.ai_assistant_view.refresh_data()
 
     def check_initial_connectivity(self):
         """Perform non-blocking health check on startup."""
@@ -503,6 +509,9 @@ class MainWindow(QMainWindow):
             self.automation_view.refresh_data()
             self.automation_view.tabs.setCurrentIndex(0)  # Rules & Pipelines
             self.view_stack.setCurrentIndex(17)
+        elif key == "ai_assistant":
+            self.ai_assistant_view.refresh_data()
+            self.view_stack.setCurrentIndex(18)
         else:
             # Planned module roadmap view
             self.planned_module_view.load_module(key)

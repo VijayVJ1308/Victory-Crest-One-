@@ -100,6 +100,10 @@ from backend.app.models.automation import (
     WorkflowRule,
     WorkflowExecutionLog
 )
+from backend.app.models.ai_assistant import (
+    AiConversationThread,
+    AiMessageLog
+)
 
 __all__ = [
     "Base",
@@ -178,7 +182,9 @@ __all__ = [
     "BiReportSnapshot",
     "BiSavedQuery",
     "WorkflowRule",
-    "WorkflowExecutionLog"
+    "WorkflowExecutionLog",
+    "AiConversationThread",
+    "AiMessageLog"
 ]
 
 

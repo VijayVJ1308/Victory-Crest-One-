@@ -26,7 +26,8 @@ from backend.app.api.v1.endpoints import (
     manufacturing,
     projects,
     bi,
-    automation
+    automation,
+    ai_assistant
 )
 
 api_router = APIRouter()
@@ -54,6 +55,8 @@ api_router.include_router(manufacturing.router, tags=["Manufacturing & Productio
 api_router.include_router(projects.router, tags=["Project Management & PSA"])
 api_router.include_router(bi.router, tags=["Business Intelligence & Analytics"])
 api_router.include_router(automation.router, prefix="/automation", tags=["Workflow Automation & Rules Engine"])
+api_router.include_router(ai_assistant.router, prefix="/ai", tags=["AI Business Assistant & Semantic Q&A"])
+
 
 
 

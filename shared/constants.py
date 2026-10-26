@@ -188,6 +188,15 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🤖",
         "description": "Permission-aware query engine, safe semantic summaries, and executive Q&A.",
         "phase": 16,
+        "status": "active"
+    },
+    {
+        "id": "iot_gateways",
+        "name": "IoT & Smart Devices",
+        "category": CATEGORY_OPERATIONS,
+        "icon": "📡",
+        "description": "Smart energy meters, guestroom automation, kitchen sensors, and asset telemetry.",
+        "phase": 17,
         "status": "planned"
     },
     {

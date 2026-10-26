@@ -3,7 +3,7 @@ Decimal-safe and zero-division-protected calculation functions for KPIs, hospita
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Union, Optional, Dict, List, Any
+from typing import Union, Optional, Dict, List, Any, Tuple
 from datetime import datetime, timezone
 
 Number = Union[int, float, Decimal]
@@ -1733,6 +1733,127 @@ def calculate_workflow_kpis(executions: List[Dict[str, Any]]) -> Dict[str, Any]:
         "avg_duration_ms": avg_duration,
         "total_actions_triggered": total_actions
     }
+
+
+# ============================================================================
+# Phase 16: AI Business Assistant & Semantic Intent Resolution
+# ============================================================================
+
+def classify_natural_language_intent(prompt: str) -> str:
+    """
+    Classify a natural language user query into canonical enterprise intents.
+    Returns an AiQueryIntent value string.
+    """
+    if not prompt:
+        return "GENERAL_INQUIRY"
+
+    p = prompt.strip().lower()
+
+    if any(k in p for k in ("occupancy", "room", "rooms", "adr", "revpar", "guest", "resort", "hotel", "checkin", "folio")):
+        return "OCCUPANCY_STATUS"
+
+    if any(k in p for k in ("ebitda", "gop", "profit", "margin", "cash", "balance sheet", "ratio", "liquidity")):
+        return "FINANCIAL_HEALTH"
+
+    if any(k in p for k in ("revenue", "sales", "income", "topline", "growth", "turnover", "pipeline", "deal", "quote")):
+        return "REVENUE_ANALYSIS"
+
+    if any(k in p for k in ("stock", "warehouse", "reorder", "purchase order", "inventory", "sku", "bom", "deficit")):
+        return "INVENTORY_AUDIT"
+
+    if any(k in p for k in ("project", "milestone", "timesheet", "psa", "deliverable", "wbs")):
+        return "PROJECT_DELIVERY"
+
+    if any(k in p for k in ("sla", "ticket", "support", "incident", "field service", "work order")):
+        return "SERVICE_SLA"
+
+    if any(k in p for k in ("staff", "employee", "headcount", "payroll", "salary", "attendance", "leave", "hr")):
+        return "STAFFING_OVERVIEW"
+
+    if any(k in p for k in ("kpi", "overview", "executive", "summary", "dashboard", "telemetry", "health")):
+        return "EXECUTIVE_KPI"
+
+    return "GENERAL_INQUIRY"
+
+
+def filter_data_by_role_permissions(user_role: str, data: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+    """
+    Apply role-based access control (RBAC) data masking to AI inquiry responses.
+    Returns (filtered_data_dict, safety_rating).
+    """
+    role = str(user_role).strip()
+    executive_roles = {
+        "System Administrator",
+        "Organisation Owner",
+        "Group General Manager",
+        "General Manager",
+        "Finance Manager",
+        "Business Intelligence Analyst"
+    }
+
+    if role in executive_roles:
+        return data, "SAFE"
+
+    # Restricted financial keys for non-executive roles
+    restricted_keys = {
+        "ebitda", "ebitda_margin_percent", "net_income", "net_margin_percent",
+        "cash_balance", "accounts_payable", "salary", "gross_salary", "net_salary"
+    }
+
+    filtered = {}
+    had_restricted = False
+    for k, v in data.items():
+        if k in restricted_keys:
+            had_restricted = True
+            filtered[k] = "[CONFIDENTIAL - Executive Clearance Required]"
+        else:
+            filtered[k] = v
+
+    rating = "CONFIDENTIAL_RESTRICTED" if had_restricted else "SAFE"
+    return filtered, rating
+
+
+def calculate_ai_assistant_metrics(history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Calculate telemetry metrics for AI assistant query history.
+    """
+    total = len(history)
+    if total == 0:
+        return {
+            "total_queries": 0,
+            "avg_latency_ms": Decimal("0.00"),
+            "intent_counts": {},
+            "safe_queries_percent": Decimal("100.00")
+        }
+
+    total_latency = Decimal("0.00")
+    safe_count = 0
+    intent_counts = {}
+
+    for item in history:
+        lat = item.get("latency_ms", 0)
+        try:
+            total_latency += to_decimal(lat)
+        except Exception:
+            pass
+
+        intent = item.get("intent", "GENERAL_INQUIRY")
+        intent_counts[intent] = intent_counts.get(intent, 0) + 1
+
+        rating = item.get("safety_rating", "SAFE")
+        if rating == "SAFE":
+            safe_count += 1
+
+    avg_lat = (total_latency / Decimal(total)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    safe_pct = ((Decimal(safe_count) / Decimal(total)) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "total_queries": total,
+        "avg_latency_ms": avg_lat,
+        "intent_counts": intent_counts,
+        "safe_queries_percent": safe_pct
+    }
+
 
 
 

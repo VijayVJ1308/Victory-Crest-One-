@@ -198,6 +198,7 @@ Victory Crest ONE enforces strict tenant isolation:
 - [x] **Phase 13: Project Management & Professional Services (PSA)** (Work Breakdown Structures (WBS), project portfolios, task hierarchies, contract milestone deliverable schedules, billable and non-billable labor timesheets, direct project expenses, budget variance & burn rate analytics, and automated double-entry GL revenue recognition: DR 1020 Accounts Receivable, CR 4040 Service & Event Fee Revenue, CR 2020 GST Output Tax Payable 18%)
 - [x] **Phase 14: Business Intelligence & Executive Analytics** (Multi-dimensional executive KPI dashboards, Gross Operating Profit (GOP), EBITDA, departmental P&L contribution, physical property benchmarking, financial health ratios, linear predictive revenue forecasting, and high-fidelity multi-format document exports in Excel `.xlsx`, PDF with ReportLab corporate dossier formatting, and RFC-4180 CSV)
 - [x] **Phase 15: Workflow Automation & Event Rules Engine** (Event triggers across modules, state change & threshold condition evaluators, automated action pipelines [task dispatch, PO reorder requisitions, GL journal entries, notifications, webhooks], execution audit trail logs, and interactive desktop event simulator)
+- [x] **Phase 16: AI Business Assistant & Executive Inquiry** (Role-based semantic Q&A, natural language intent resolution, multi-domain telemetry synthesis across all 16 modules, RBAC confidential data masking, conversational threads, and desktop conversational console with interactive prompt chips)
 
 ---
 
@@ -209,19 +210,20 @@ Run the full automated test suite (unit, integration, security, and UI shell tes
 ./.venv/bin/pytest tests/ -v
 ```
 
-**231 automated tests** pass with 100% success across all domains:
-- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, project PSA budget/burn rate, BI financial ratios / forecasting, and workflow rule condition evaluators / KPI telemetry
+**244 automated tests** pass with 100% success across all domains:
+- **Unit Tests**: Decimal-safe hospitality, financial, CRM, POS, marketing, inventory/AVCO, HR/payroll, field service SLA, resort folios, manufacturing BOM/scrap, project PSA budget/burn rate, BI financial ratios / forecasting, workflow rule condition evaluators, and AI assistant intent classification / RBAC masking
 - **Security Tests**: Argon2 password hashing, JWT integrity, RBAC permissions matrix
-- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, Project Management / PSA, Business Intelligence / Document Exports, and Workflow Automation / Event Dispatching
-- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 17)
+- **Integration Tests**: FastAPI REST endpoints for Health, Master Data, Finance, CRM, POS, Marketing, Inventory, HR/Payroll, Field Service, Hospitality PMS, Manufacturing Orders, Project Management / PSA, Business Intelligence / Document Exports, Workflow Automation, and AI Business Assistant
+- **UI Tests**: PySide6 desktop views, custom widgets, and MainWindow route stack (stack index 0 to 18)
 
 ---
 
-## 📅 Next Phase: Phase 16 — AI Business Assistant
-- Role-based semantic Q&A and natural language executive inquiry
-- Structured data summarization and operational synthesis
-- Strict tenant and permission-aware data retrieval guards
-- Desktop interactive conversational assistant view
+## 📅 Next Phase: Phase 17 — IoT & Smart Device Gateways
+- Smart energy meter integration and utility telemetry
+- Guestroom climate, smart locks, and keyless access gateways
+- Kitchen cold-storage temperature compliance sensors
+- Asset condition monitoring and automated maintenance work orders
+
 
 
 

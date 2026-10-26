@@ -2560,6 +2560,93 @@ class ApiClient:
             "recent_logs": telem.get("recent_logs", [])
         }
 
+    # =========================================================================
+    # Phase 16: AI Business Assistant & Semantic Query Resolution
+    # =========================================================================
+
+    def query_ai_assistant(
+        self,
+        prompt: str,
+        thread_id: Optional[str] = None,
+        property_id: Optional[str] = None,
+        user_role: Optional[str] = "General Manager"
+    ) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/ai/query"
+        body = {
+            "prompt": prompt,
+            "thread_id": thread_id,
+            "property_id": property_id,
+            "user_role": user_role
+        }
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.ai_assistant_service import ai_assistant_service
+        from backend.app.schemas.ai_assistant import AiQueryRequest
+        resp = ai_assistant_service.query(AiQueryRequest(**body))
+        return resp.model_dump()
+
+    def get_ai_threads(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/ai/threads"
+        params = {"user_id": user_id} if user_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.ai_assistant_service import ai_assistant_service
+        return ai_assistant_service.get_threads(user_id=user_id)
+
+    def get_ai_thread_messages(self, thread_id: str) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/ai/threads/{thread_id}/messages"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.ai_assistant_service import ai_assistant_service
+        return ai_assistant_service.get_thread_messages(thread_id)
+
+    def get_ai_telemetry(self) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/ai/telemetry"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.ai_assistant_service import ai_assistant_service
+        telem = ai_assistant_service.get_telemetry()
+        return {
+            "total_queries": telem["total_queries"],
+            "avg_latency_ms": str(telem["avg_latency_ms"]),
+            "safe_queries_percent": str(telem["safe_queries_percent"]),
+            "intent_distribution": telem.get("intent_distribution", {}),
+            "total_threads": telem.get("total_threads", 0),
+            "recent_queries": telem.get("recent_queries", [])
+        }
+
+    def reset_ai_conversations(self) -> bool:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/ai/reset"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return True
+        except Exception:
+            pass
+        from backend.app.services.ai_assistant_service import ai_assistant_service
+        return ai_assistant_service.reset_threads()
+
 
 api_client = ApiClient()
 
