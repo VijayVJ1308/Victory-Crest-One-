@@ -108,6 +108,11 @@ from backend.app.models.iot import (
     IoTDevice,
     IoTTelemetryReading
 )
+from backend.app.models.lakehouse import (
+    LakeDataset,
+    DataPipelineJob,
+    MlModelRegistry
+)
 
 __all__ = [
     "Base",
@@ -190,6 +195,9 @@ __all__ = [
     "AiConversationThread",
     "AiMessageLog",
     "IoTDevice",
-    "IoTTelemetryReading"
+    "IoTTelemetryReading",
+    "LakeDataset",
+    "DataPipelineJob",
+    "MlModelRegistry"
 ]
 

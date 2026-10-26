@@ -28,6 +28,7 @@ class ModuleType(str, Enum):
     AUTOMATION = "automation"
     AI_ASSISTANT = "ai_assistant"
     IOT_GATEWAYS = "iot_gateways"
+    ANALYTICS_LAKE = "analytics_lake"
     SETTINGS = "settings"
 
 
@@ -729,6 +730,45 @@ class AlertSeverity(str, Enum):
     INFO = "INFO"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
+
+
+# ============================================================================
+# Phase 18: Data Lakehouse & Predictive ML
+# ============================================================================
+
+class LakeDatasetType(str, Enum):
+    FINANCIAL_LEDGER = "FINANCIAL_LEDGER"
+    GUEST_FOLIOS = "GUEST_FOLIOS"
+    INVENTORY_TELEMETRY = "INVENTORY_TELEMETRY"
+    IOT_SENSOR_STREAM = "IOT_SENSOR_STREAM"
+    POS_COMMERCE_TRANSACTIONS = "POS_COMMERCE_TRANSACTIONS"
+
+
+class PipelineRunStatus(str, Enum):
+    IDLE = "IDLE"
+    EXTRACTING = "EXTRACTING"
+    COMPACTING = "COMPACTING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class MlModelType(str, Enum):
+    DEMAND_FORECAST_REGRESSOR = "DEMAND_FORECAST_REGRESSOR"
+    DYNAMIC_RATE_OPTIMIZER = "DYNAMIC_RATE_OPTIMIZER"
+    GUEST_CHURN_CLASSIFIER = "GUEST_CHURN_CLASSIFIER"
+    EQUIPMENT_FAILURE_PROBABILITY = "EQUIPMENT_FAILURE_PROBABILITY"
+
+
+class PredictionConfidence(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class DatasetFormat(str, Enum):
+    PARQUET = "PARQUET"
+    CSV = "CSV"
+    DELTA = "DELTA"
 
 
 

@@ -122,6 +122,16 @@ from backend.app.schemas.iot import (
     IoTDeviceCommandResponse,
     IoTMetricsOut
 )
+from backend.app.schemas.lakehouse import (
+    LakeDatasetCreate,
+    LakeDatasetOut,
+    DataPipelineJobCreate,
+    DataPipelineJobOut,
+    MlModelOut,
+    MlInferenceRequest,
+    MlInferenceResponse,
+    LakehouseMetricsOut
+)
 
 __all__ = [
     "SystemHealthSchema",
@@ -325,7 +335,15 @@ __all__ = [
     "IoTTelemetryReadingOut",
     "IoTDeviceCommandRequest",
     "IoTDeviceCommandResponse",
-    "IoTMetricsOut"
+    "IoTMetricsOut",
+    "LakeDatasetCreate",
+    "LakeDatasetOut",
+    "DataPipelineJobCreate",
+    "DataPipelineJobOut",
+    "MlModelOut",
+    "MlInferenceRequest",
+    "MlInferenceResponse",
+    "LakehouseMetricsOut"
 ]
 
 

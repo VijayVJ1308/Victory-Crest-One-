@@ -2816,8 +2816,135 @@ class ApiClient:
             "avg_battery_percent": str(metrics["avg_battery_percent"])
         }
 
+    # =========================================================================
+    # Phase 18: Data Lakehouse & Predictive ML
+    # =========================================================================
+
+    def get_lake_datasets(
+        self,
+        property_id: Optional[str] = None,
+        dataset_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/datasets"
+        params = {}
+        if property_id:
+            params["property_id"] = property_id
+        if dataset_type:
+            params["dataset_type"] = dataset_type
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        return lakehouse_service.get_datasets(property_id=property_id, dataset_type=dataset_type)
+
+    def get_lake_dataset(self, dataset_id: str) -> Optional[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/datasets/{dataset_id}"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        return lakehouse_service.get_dataset_by_id(dataset_id)
+
+    def create_lake_dataset(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/datasets"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=data)
+                if res.status_code == 201:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        from backend.app.schemas.lakehouse import LakeDatasetCreate
+        return lakehouse_service.create_dataset(LakeDatasetCreate(**data))
+
+    def get_data_pipelines(self, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/pipelines"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        return lakehouse_service.get_pipelines(property_id=property_id)
+
+    def run_data_pipeline(self, pipeline_id: str) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/pipelines/{pipeline_id}/run"
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        return lakehouse_service.run_pipeline(pipeline_id)
+
+    def get_ml_models(self, model_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/models"
+        params = {"model_type": model_type} if model_type else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        return lakehouse_service.get_ml_models(model_type=model_type)
+
+    def run_ml_inference(self, model_code: str, features: Dict[str, Any]) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/models/{model_code}/predict"
+        body = {"model_code": model_code, "features": features}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.post(url, json=body)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        from backend.app.schemas.lakehouse import MlInferenceRequest
+        return lakehouse_service.predict(MlInferenceRequest(**body))
+
+    def get_lakehouse_metrics(self, property_id: Optional[str] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{desktop_config.API_V1_PREFIX}/lakehouse/metrics"
+        params = {"property_id": property_id} if property_id else {}
+        try:
+            with httpx.Client(timeout=self.timeout, headers=self._headers()) as client:
+                res = client.get(url, params=params)
+                if res.status_code == 200:
+                    return res.json()
+        except Exception:
+            pass
+        from backend.app.services.lakehouse_service import lakehouse_service
+        metrics = lakehouse_service.get_metrics(property_id=property_id)
+        return {
+            "total_datasets": metrics["total_datasets"],
+            "total_parquet_size_mb": str(metrics["total_parquet_size_mb"]),
+            "total_raw_size_mb": str(metrics["total_raw_size_mb"]),
+            "overall_compression_ratio": str(metrics["overall_compression_ratio"]),
+            "active_pipelines_count": metrics["active_pipelines_count"],
+            "daily_records_ingested": metrics["daily_records_ingested"],
+            "pipeline_success_rate_percent": str(metrics["pipeline_success_rate_percent"]),
+            "deployed_ml_models_count": metrics["deployed_ml_models_count"],
+            "avg_model_accuracy_percent": str(metrics["avg_model_accuracy_percent"])
+        }
+
 
 api_client = ApiClient()
+
 
 
 

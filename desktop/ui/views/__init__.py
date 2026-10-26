@@ -21,6 +21,7 @@ from desktop.ui.views.bi_view import BusinessIntelligenceView
 from desktop.ui.views.automation_view import WorkflowAutomationView
 from desktop.ui.views.ai_assistant_view import AiAssistantView
 from desktop.ui.views.iot_view import IoTGatewaysView
+from desktop.ui.views.lakehouse_view import LakehouseView
 
 __all__ = [
     "DashboardView",
@@ -42,7 +43,8 @@ __all__ = [
     "BusinessIntelligenceView",
     "WorkflowAutomationView",
     "AiAssistantView",
-    "IoTGatewaysView"
+    "IoTGatewaysView",
+    "LakehouseView"
 ]
 
 

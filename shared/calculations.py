@@ -2015,3 +2015,222 @@ def calculate_iot_portfolio_metrics(
         "avg_battery_percent": avg_battery
     }
 
+
+# ============================================================================
+# Phase 18: Data Lakehouse & Predictive ML Calculations
+# ============================================================================
+
+def calculate_lake_storage_efficiency(
+    raw_bytes: Number,
+    parquet_bytes: Number
+) -> Dict[str, Any]:
+    """
+    Calculate columnar compression ratio and storage capacity reduction for Apache Parquet partitions.
+    Zero-division safe.
+    """
+    raw = to_decimal(raw_bytes)
+    compressed = to_decimal(parquet_bytes)
+
+    if raw <= Decimal("0"):
+        return {
+            "raw_bytes": Decimal("0.00"),
+            "parquet_bytes": Decimal("0.00"),
+            "bytes_saved": Decimal("0.00"),
+            "compression_ratio": Decimal("1.00"),
+            "space_reduction_percent": Decimal("0.00")
+        }
+
+    saved = max(Decimal("0.00"), raw - compressed)
+    ratio = (raw / compressed).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if compressed > Decimal("0") else Decimal("1.00")
+    pct_saved = ((saved / raw) * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "raw_bytes": raw.quantize(Decimal("0.01")),
+        "parquet_bytes": compressed.quantize(Decimal("0.01")),
+        "bytes_saved": saved.quantize(Decimal("0.01")),
+        "compression_ratio": ratio,
+        "space_reduction_percent": pct_saved
+    }
+
+
+def evaluate_demand_forecast(
+    base_demand: Number,
+    seasonality_factor: Number = Decimal("1.0"),
+    event_multiplier: Number = Decimal("1.0"),
+    base_rate: Number = Decimal("5000.00")
+) -> Dict[str, Any]:
+    """
+    Predict future operational demand (e.g. room occupancy, dining covers)
+    and compute elasticity-optimized dynamic rate recommendations.
+    """
+    base = to_decimal(base_demand)
+    seas = to_decimal(seasonality_factor)
+    evt = to_decimal(event_multiplier)
+    rate = to_decimal(base_rate)
+
+    if base <= Decimal("0"):
+        return {
+            "predicted_demand": Decimal("0.00"),
+            "confidence_lower": Decimal("0.00"),
+            "confidence_upper": Decimal("0.00"),
+            "recommended_rate": rate.quantize(Decimal("0.01")),
+            "pricing_tier": "NOMINAL"
+        }
+
+    predicted = base * seas * evt
+    lower = predicted * Decimal("0.92")
+    upper = predicted * Decimal("1.08")
+
+    # Elasticity dynamic pricing tiers
+    if predicted >= Decimal("90.0"):
+        rec_rate = rate * Decimal("1.25")
+        tier = "SURGE"
+    elif predicted >= Decimal("75.0"):
+        rec_rate = rate * Decimal("1.10")
+        tier = "PEAK"
+    elif predicted < Decimal("50.0"):
+        rec_rate = rate * Decimal("0.85")
+        tier = "DISCOUNT"
+    else:
+        rec_rate = rate
+        tier = "NOMINAL"
+
+    return {
+        "predicted_demand": predicted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "confidence_lower": lower.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "confidence_upper": upper.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "recommended_rate": rec_rate.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "pricing_tier": tier
+    }
+
+
+def calculate_guest_churn_risk(
+    days_since_last_stay: int,
+    total_bookings: int,
+    nps_rating: Optional[Number] = None
+) -> Tuple[Decimal, str]:
+    """
+    Compute machine-learning guest churn probability percentage and risk classification tier.
+    Returns: (churn_probability_percent, risk_tier)
+    Risk tiers: LOW (<40%), MODERATE (40-69%), CRITICAL (>=70%).
+    """
+    days = max(0, int(days_since_last_stay))
+    bookings = max(0, int(total_bookings))
+
+    # Base churn scales with days of inactivity (0.25% per day inactive)
+    churn = min(Decimal("100.00"), to_decimal(days) * Decimal("0.25"))
+
+    # Booking loyalty dampener
+    if bookings >= 5:
+        churn = max(Decimal("5.00"), churn * Decimal("0.70"))
+    elif bookings >= 2:
+        churn = max(Decimal("10.00"), churn * Decimal("0.85"))
+
+    # NPS sentiment modifier
+    if nps_rating is not None:
+        nps = to_decimal(nps_rating)
+        if nps <= Decimal("6.0"):
+            # Detractors escalate churn risk sharply
+            churn = min(Decimal("100.00"), churn + ((Decimal("10.0") - nps) * Decimal("5.0")))
+        elif nps >= Decimal("9.0"):
+            # Promoters enjoy strong retention probability
+            churn = max(Decimal("2.00"), churn * Decimal("0.80"))
+
+    final_churn = churn.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if final_churn >= Decimal("70.00"):
+        tier = "CRITICAL"
+    elif final_churn >= Decimal("40.00"):
+        tier = "MODERATE"
+    else:
+        tier = "LOW"
+
+    return final_churn, tier
+
+
+def calculate_lakehouse_metrics(
+    pipelines: List[Dict[str, Any]],
+    datasets: List[Dict[str, Any]],
+    ml_models: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Compute aggregate lakehouse data pipeline throughput, compression ratio,
+    and machine learning model registry performance. Zero-division safe.
+    """
+    total_datasets = len(datasets)
+    total_raw_bytes = Decimal("0.00")
+    total_parquet_bytes = Decimal("0.00")
+
+    for ds in datasets:
+        raw_b = ds.get("raw_size_bytes")
+        parq_b = ds.get("size_bytes", 0)
+        p_val = to_decimal(parq_b)
+        total_parquet_bytes += p_val
+        if raw_b is not None:
+            total_raw_bytes += to_decimal(raw_b)
+        else:
+            # Default uncompressed raw factor (~3.5x for tabular parquet)
+            total_raw_bytes += (p_val * Decimal("3.50"))
+
+    overall_ratio = Decimal("1.00")
+    if total_parquet_bytes > Decimal("0"):
+        overall_ratio = (total_raw_bytes / total_parquet_bytes).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    # Pipelines throughput
+    total_pipelines = len(pipelines)
+    active_pipelines = 0
+    success_pipelines = 0
+    daily_records = 0
+
+    for pl in pipelines:
+        st = str(pl.get("status", "")).upper()
+        if st in ("IDLE", "EXTRACTING", "COMPACTING", "COMPLETED"):
+            active_pipelines += 1
+        if st == "COMPLETED":
+            success_pipelines += 1
+        daily_records += int(pl.get("records_processed", 0))
+
+    success_rate = Decimal("100.00")
+    if total_pipelines > 0:
+        success_rate = ((Decimal(success_pipelines) / Decimal(total_pipelines)) * Decimal("100.00")).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
+    # ML Model metrics
+    deployed_models = len(ml_models)
+    acc_sum = Decimal("0.00")
+    acc_count = 0
+
+    for m in ml_models:
+        acc = m.get("accuracy_score")
+        if acc is not None:
+            acc_sum += to_decimal(acc)
+            acc_count += 1
+
+    avg_accuracy = Decimal("0.00")
+    if acc_count > 0:
+        # Scale to percentage if reported as 0.0-1.0
+        raw_avg = acc_sum / Decimal(acc_count)
+        if raw_avg <= Decimal("1.0"):
+            avg_accuracy = (raw_avg * Decimal("100.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        else:
+            avg_accuracy = raw_avg.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    # Convert bytes to MB for display (1 MB = 1,048,576 bytes)
+    mb_div = Decimal("1048576.0")
+    parquet_mb = (total_parquet_bytes / mb_div).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    raw_mb = (total_raw_bytes / mb_div).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "total_datasets": total_datasets,
+        "total_parquet_size_mb": parquet_mb,
+        "total_raw_size_mb": raw_mb,
+        "overall_compression_ratio": overall_ratio,
+        "active_pipelines_count": active_pipelines,
+        "daily_records_ingested": daily_records,
+        "pipeline_success_rate_percent": success_rate,
+        "deployed_ml_models_count": deployed_models,
+        "avg_model_accuracy_percent": avg_accuracy
+    }
+
+

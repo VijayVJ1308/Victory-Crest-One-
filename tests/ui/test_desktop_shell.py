@@ -70,12 +70,17 @@ def test_main_window_shell_initialization(qapp):
     window.navigate_to("iot_gateways")
     assert window.view_stack.currentIndex() == 19
 
-    # Test navigation to a planned module (analytics_lake)
+    # Test navigation to an active module (analytics_lake)
     window.navigate_to("analytics_lake")
+    assert window.view_stack.currentIndex() == 20
+
+    # Test navigation to a planned module (cybersecurity_governance)
+    window.navigate_to("cybersecurity_governance")
     assert window.view_stack.currentIndex() == 2
-    assert window.planned_module_view.current_module_id == "analytics_lake"
+    assert window.planned_module_view.current_module_id == "cybersecurity_governance"
     
     # Return to dashboard
     window.navigate_to("dashboard")
     assert window.view_stack.currentIndex() == 0
+
 

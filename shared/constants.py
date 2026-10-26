@@ -206,8 +206,18 @@ MODULE_CATALOG: List[Dict[str, Any]] = [
         "icon": "🔮",
         "description": "Distributed parquet data lake, cross-enterprise machine learning models, and automated forecasting.",
         "phase": 18,
+        "status": "active"
+    },
+    {
+        "id": "cybersecurity_governance",
+        "name": "Zero-Trust Security & Audit",
+        "category": CATEGORY_CORE,
+        "icon": "🛡️",
+        "description": "Continuous automated audit posture, zero-trust cryptographic verification, and security governance.",
+        "phase": 19,
         "status": "planned"
     },
+
     {
         "id": "documents",
         "name": "Shared Documents",
